@@ -5,7 +5,7 @@
 // 'flutter create' template.
 
 // The application's name. By default this is also the title of the Flutter window.
-PRODUCT_NAME = discover_self
+PRODUCT_NAME = 发现自我
 
 // The application's bundle identifier
 PRODUCT_BUNDLE_IDENTIFIER = com.discoverself.discoverSelf

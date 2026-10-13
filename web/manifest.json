@@ -1,6 +1,6 @@
 {
-    "name": "discover_self",
-    "short_name": "discover_self",
+    "name": "发现自我",
+    "short_name": "发现自我",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
