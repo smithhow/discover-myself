@@ -1,0 +1,4 @@
+{ "version": 1, "items": [
+  { "id": "badge_1", "name": "初识自我", "weight": 40, "stock": 1000 },
+  { "id": "badge_2", "name": "潜行者", "weight": 10, "stock": 100 }
+]}

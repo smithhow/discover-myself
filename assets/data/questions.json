@@ -1,0 +1,3 @@
+{ "version": 1, "items": [
+  { "id": "p1", "type": "personality", "dimension": "openness", "text": "我喜欢尝试新事物。", "options": ["非常不同意","不同意","同意","非常同意"] }
+]}
