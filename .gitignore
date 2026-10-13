@@ -1,0 +1,23 @@
+# Flutter/Dart
+.dart_tool/
+.packages
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+*.iml
+.idea/
+.vscode/
+
+# Android/iOS
+android/.gradle/
+android/local.properties
+ios/Pods/
+ios/.symlinks/
+*.lock
+
+# Superpowers SDD scratch
+.superpowers/
+
+# OS
+Thumbs.db
+.DS_Store
