@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.discoverself" "\0"
-            VALUE "FileDescription", "discover_self" "\0"
+            VALUE "FileDescription", "发现自我" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "discover_self" "\0"
+            VALUE "InternalName", "发现自我" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2026 com.discoverself. All rights reserved." "\0"
             VALUE "OriginalFilename", "discover_self.exe" "\0"
-            VALUE "ProductName", "discover_self" "\0"
+            VALUE "ProductName", "发现自我" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END
