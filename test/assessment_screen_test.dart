@@ -7,9 +7,9 @@ void main() {
   testWidgets('answering all questions calls onDone with answers', (tester) async {
     Map<String, int>? done;
     await tester.pumpWidget(MaterialApp(home: AssessmentScreen(
-      questions: [
-        const Question(id: 'p1', type: 'personality', dimension: 'openness', text: 'Q1', options: ['a', 'b']),
-        const Question(id: 'p2', type: 'personality', dimension: 'openness', text: 'Q2', options: ['a', 'b']),
+      questions: const [
+        Question(id: 'p1', type: 'personality', dimension: 'openness', text: 'Q1', options: ['a', 'b']),
+        Question(id: 'p2', type: 'personality', dimension: 'openness', text: 'Q2', options: ['a', 'b']),
       ],
       onDone: (a) => done = a,
     )));
