@@ -29,8 +29,13 @@ class _FileSaltStore implements SaltStore {
   }
 
   @override
-  Future<void> write(List<int> salt) async {
-    final file = await _file();
-    await file.writeAsString(base64.encode(salt), flush: true);
+  Future<bool> write(List<int> salt) async {
+    try {
+      final file = await _file();
+      await file.writeAsString(base64.encode(salt), flush: true);
+      return true;
+    } catch (_) {
+      return false;
+    }
   }
 }

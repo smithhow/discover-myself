@@ -5,6 +5,20 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../encryption/key_derivation.dart';
 import 'salt_store.dart';
 
+/// Thrown when a fresh salt cannot be persisted by any store.
+///
+/// Proceeding with an unpersisted salt would produce a key that cannot be
+/// re-derived on the next launch, permanently locking the user out of their
+/// encrypted database. Callers must surface this instead of continuing.
+class SaltPersistenceException implements Exception {
+  const SaltPersistenceException(this.message);
+
+  final String message;
+
+  @override
+  String toString() => 'SaltPersistenceException: $message';
+}
+
 /// Provides the per-install encryption salt and derives PIN keys.
 ///
 /// The random 16-byte salt is persisted so every install derives a unique,
@@ -13,11 +27,11 @@ import 'salt_store.dart';
 ///
 /// 1. Secure storage (Keychain / Keystore / web secure storage).
 /// 2. A file under the app support directory on IO platforms.
-/// 3. An in-process salt, only when both stores fail.
 ///
-/// When a salt is generated it is written to *every* available store, so a
-/// single store failing on a later launch cannot change the derived key and
-/// lock the user out of their database.
+/// When a salt is generated it is cached in-process first (so retries within the
+/// same process are stable) and then written to *every* available store. If no
+/// store can persist it, [salt] throws [SaltPersistenceException] rather than
+/// silently proceeding.
 ///
 /// Tests inject `useSecureStorage: false` to use a purely in-memory salt with no
 /// platform channel (which would otherwise never complete under the fake-async
@@ -43,10 +57,13 @@ class PinService {
 
   /// Returns the persistent random 16-byte salt, creating and storing it on
   /// first use.
+  ///
+  /// Throws a [SaltPersistenceException] when a newly generated salt cannot be
+  /// persisted by any available store, so an unrecoverable key is never used.
   Future<List<int>> salt() async {
     if (!_useSecureStorage) return _memorySalt ??= randomSalt();
 
-    // 1) Primary: secure storage.
+    // 1) Primary: secure storage read.
     try {
       final stored = await _storage.read(key: _saltKey);
       if (stored != null && stored.isNotEmpty) return base64.decode(stored);
@@ -65,9 +82,9 @@ class PinService {
       }
     }
 
-    // 3) Nothing persisted yet: generate once and mirror to every store so any
-    // single store failing on a later launch can still recover the value.
-    final generated = randomSalt();
+    // 3) Nothing persisted yet: cache in-process first so retries within this
+    // process stay stable, then mirror to every store.
+    final generated = _memorySalt ??= randomSalt();
     var persisted = false;
     try {
       await _storage.write(key: _saltKey, value: base64.encode(generated));
@@ -77,13 +94,17 @@ class PinService {
     }
     if (fallback != null) {
       try {
-        await fallback.write(generated);
-        persisted = true;
+        if (await fallback.write(generated)) persisted = true;
       } catch (_) {
-        // Ignore; falls back to the in-process salt below.
+        // Ignore; persistence failure is handled below.
       }
     }
-    return persisted ? generated : (_memorySalt ??= generated);
+    if (!persisted) {
+      throw const SaltPersistenceException(
+        '无法安全保存密钥，请检查设备存储设置',
+      );
+    }
+    return generated;
   }
 
   /// Derives a 32-byte key for [pin] using the persistent salt.

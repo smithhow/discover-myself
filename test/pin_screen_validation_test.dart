@@ -75,6 +75,38 @@ void main() {
     await tester.pump(const Duration(milliseconds: 150));
   });
 
+  testWidgets('a SaltPersistenceException shows the storage error and does not '
+      'count as a failed attempt', (tester) async {
+    var persistenceFailure = true;
+    await tester.pumpWidget(MaterialApp(
+      home: PinScreen(
+        pinService: PinService(useSecureStorage: false),
+        onUnlocked: (_) async {
+          if (persistenceFailure) {
+            throw const SaltPersistenceException('无法安全保存密钥，请检查设备存储设置');
+          }
+          throw Exception('bad pin');
+        },
+        maxAttempts: 2,
+      ),
+    ));
+
+    await tester.enterText(find.byKey(const Key('pin_field')), '1234');
+    await tester.tap(find.byKey(const Key('pin_submit')));
+    await tester.pump();
+    expect(find.text('无法安全保存密钥，请检查设备存储设置'), findsOneWidget);
+
+    // A subsequent genuine wrong-PIN failure must be the *first* failure, so the
+    // button stays enabled rather than immediately locking out.
+    persistenceFailure = false;
+    await tester.tap(find.byKey(const Key('pin_submit')));
+    await tester.pump();
+    expect(find.text('PIN 错误，请重试'), findsOneWidget);
+    final button =
+        tester.widget<ElevatedButton>(find.byKey(const Key('pin_submit')));
+    expect(button.onPressed, isNotNull);
+  });
+
   testWidgets('a second tap while unlock is in flight is ignored', (tester) async {
     final completer = Completer<List<int>>();
     final service = _BlockingPinService(completer.future);

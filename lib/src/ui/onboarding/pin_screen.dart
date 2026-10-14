@@ -60,6 +60,14 @@ class _PinScreenState extends State<PinScreen> {
         _failures = 0;
         _busy = false;
       });
+    } on SaltPersistenceException catch (e) {
+      // A storage failure is not a wrong PIN: surface it without counting it
+      // toward the lockout, otherwise a device issue locks the user out.
+      if (!mounted) return;
+      setState(() {
+        _error = e.message;
+        _busy = false;
+      });
     } catch (_) {
       if (!mounted) return;
       _failures++;

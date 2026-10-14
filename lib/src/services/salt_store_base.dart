@@ -8,5 +8,9 @@ abstract class SaltStore {
   Future<List<int>?> read();
 
   /// Persists [salt] so it survives process restarts.
-  Future<void> write(List<int> salt);
+  ///
+  /// Returns `true` only when the value was actually persisted; `false` when the
+  /// store cannot persist (e.g. the web no-op store). A `false` result lets
+  /// [PinService] avoid treating a non-persisted salt as durable.
+  Future<bool> write(List<int> salt);
 }
