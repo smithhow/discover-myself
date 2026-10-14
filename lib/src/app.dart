@@ -5,6 +5,7 @@ import 'encryption/key_derivation.dart';
 import 'services/app_coordinator.dart';
 import 'services/device_id.dart';
 import 'services/lottery.dart';
+import 'services/pin_service.dart';
 import 'ui/assessment/assessment_screen.dart';
 import 'ui/onboarding/pin_screen.dart';
 import 'ui/onboarding/profile_select_screen.dart';
@@ -28,12 +29,17 @@ class RootFlow extends StatefulWidget {
   const RootFlow({
     super.key,
     required this.coordinator,
+    this.pinService,
     this.onExport,
     this.autoLockTimeout = const Duration(minutes: 5),
     this.now = _defaultNow,
   });
 
   final AppCoordinator coordinator;
+
+  /// Overrides the PIN key derivation/unlock screen (tests inject an in-memory
+  /// salt so no platform channel is required).
+  final PinService? pinService;
 
   /// Overrides the PDF export action (tests pass a no-op).
   final Future<void> Function()? onExport;
@@ -128,11 +134,14 @@ class _RootFlowState extends State<RootFlow> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     if (_c.key == null) {
-      return PinScreen(onUnlocked: (key) async {
-        await _c.unlock(key);
-        if (!mounted) return;
-        setState(() => _stage = _Stage.profiles);
-      });
+      return PinScreen(
+        pinService: widget.pinService,
+        onUnlocked: (key) async {
+          await _c.unlock(key);
+          if (!mounted) return;
+          setState(() => _stage = _Stage.profiles);
+        },
+      );
     }
 
     switch (_stage) {
@@ -152,16 +161,7 @@ class _RootFlowState extends State<RootFlow> with WidgetsBindingObserver {
       case _Stage.assessment:
         return AssessmentScreen(
           questions: _c.questions,
-          onDone: (answers) async {
-            final scores = await _c.submitAnswers(answers);
-            final recs = await _c.recommendations(scores);
-            if (!mounted) return;
-            setState(() {
-              _scores = scores;
-              _recommendations = recs;
-              _stage = _Stage.result;
-            });
-          },
+          onDone: _finishAssessment,
         );
       case _Stage.result:
         return ResultScreen(
@@ -171,6 +171,29 @@ class _RootFlowState extends State<RootFlow> with WidgetsBindingObserver {
           onExport: widget.onExport ?? _defaultExport,
           onLottery: _drawLottery,
         );
+    }
+  }
+
+  /// Scores and persists the assessment, then advances to the result stage.
+  ///
+  /// [AssessmentScreen.onDone] is synchronous, so this is fire-and-forget; the
+  /// try/catch keeps a failure from becoming an unhandled async error and
+  /// surfaces it to the user instead of leaving them stuck.
+  Future<void> _finishAssessment(Map<String, int> answers) async {
+    try {
+      final scores = await _c.submitAnswers(answers);
+      final recs = await _c.recommendations(scores);
+      if (!mounted) return;
+      setState(() {
+        _scores = scores;
+        _recommendations = recs;
+        _stage = _Stage.result;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('提交失败，请重试')),
+      );
     }
   }
 }

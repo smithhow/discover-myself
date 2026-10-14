@@ -6,10 +6,24 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart'
 import 'package:discover_self/src/app.dart';
 import 'package:discover_self/src/db/database.dart';
 import 'package:discover_self/src/services/app_coordinator.dart';
+import 'package:discover_self/src/services/pin_service.dart';
 
 AppCoordinator _coordinator() => AppCoordinator(
       database: Database(inMemory: true, factory: databaseFactoryFfi),
     );
+
+PinService _pinService() => PinService(useSecureStorage: false);
+
+/// A coordinator whose scoring step always fails, to exercise the assessment
+/// error path.
+class _FailingSubmitCoordinator extends AppCoordinator {
+  _FailingSubmitCoordinator()
+      : super(database: Database(inMemory: true, factory: databaseFactoryFfi));
+
+  @override
+  Future<Map<String, double>> submitAnswers(Map<String, int> answers) async =>
+      throw Exception('submit failed');
+}
 
 /// Drains real async work (SQLite FFI, asset loading) then rebuilds, repeated
 /// so continuations scheduled by earlier frames also get a real zone to run in.
@@ -49,6 +63,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: RootFlow(
         coordinator: _coordinator(),
+        pinService: _pinService(),
         onExport: () async => exported = true,
       ),
     ));
@@ -85,6 +100,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: RootFlow(
         coordinator: _coordinator(),
+        pinService: _pinService(),
         onExport: () async {},
         now: () => clock,
       ),
@@ -102,5 +118,30 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('pin_field')), findsOneWidget);
+  });
+
+  testWidgets('assessment failure surfaces an error and keeps the user unstuck',
+      (tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: RootFlow(
+        coordinator: _FailingSubmitCoordinator(),
+        pinService: _pinService(),
+        onExport: () async {},
+      ),
+    ));
+
+    await _unlock(tester);
+    await tester.tap(find.byKey(const Key('profile_create')));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const Key('profile_name_field')), '孩子A');
+    await _act(tester,
+        () => tester.tap(find.byKey(const Key('profile_create_confirm'))));
+    await tester.tap(find.text('孩子A'));
+    await tester.pumpAndSettle();
+
+    await _act(tester, () => tester.tap(find.text('同意')));
+
+    expect(find.text('提交失败，请重试'), findsOneWidget);
+    expect(find.byKey(const Key('export_pdf')), findsNothing);
   });
 }

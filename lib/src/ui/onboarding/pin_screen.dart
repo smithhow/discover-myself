@@ -33,6 +33,7 @@ class _PinScreenState extends State<PinScreen> {
   String? _error;
   int _failures = 0;
   bool _coolingDown = false;
+  bool _busy = false;
   Timer? _timer;
 
   @override
@@ -43,12 +44,13 @@ class _PinScreenState extends State<PinScreen> {
   }
 
   Future<void> _submit() async {
-    if (_coolingDown) return;
+    if (_busy || _coolingDown) return;
     final pin = _c.text;
     if (!_pinPattern.hasMatch(pin)) {
       setState(() => _error = '请输入 4-6 位数字 PIN');
       return;
     }
+    setState(() => _busy = true);
     try {
       final key = await widget.pinService.deriveKeyFor(pin);
       await widget.onUnlocked(key);
@@ -56,6 +58,7 @@ class _PinScreenState extends State<PinScreen> {
       setState(() {
         _error = null;
         _failures = 0;
+        _busy = false;
       });
     } catch (_) {
       if (!mounted) return;
@@ -63,13 +66,17 @@ class _PinScreenState extends State<PinScreen> {
       if (_failures >= widget.maxAttempts) {
         _startCooldown();
       } else {
-        setState(() => _error = 'PIN 错误，请重试');
+        setState(() {
+          _error = 'PIN 错误，请重试';
+          _busy = false;
+        });
       }
     }
   }
 
   void _startCooldown() {
     setState(() {
+      _busy = false;
       _coolingDown = true;
       _error = '尝试次数过多，请等待 ${widget.cooldown.inSeconds} 秒';
     });
@@ -103,7 +110,7 @@ class _PinScreenState extends State<PinScreen> {
             const SizedBox(height: 16),
             ElevatedButton(
               key: const Key('pin_submit'),
-              onPressed: _coolingDown ? null : _submit,
+              onPressed: (_busy || _coolingDown) ? null : _submit,
               child: const Text('解锁'),
             ),
           ]),

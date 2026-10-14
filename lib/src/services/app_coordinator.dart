@@ -37,19 +37,49 @@ class AppCoordinator {
   List<Prize> prizes = const [];
 
   /// Unlocks the store with [key], opens the database and loads local data.
+  ///
+  /// The key is published only after the database and all local data load
+  /// successfully, and any failure resets the coordinator to a clean locked
+  /// state, so a wrong PIN can never leave [key] set with empty questions.
   Future<void> unlock(List<int> key) async {
-    this.key = key;
-    await _db.open(key);
-    questions = await _loader.questions();
-    prizes = await _loader.prizes();
-    final rows = await _db.profiles();
-    if (rows.isEmpty) {
-      profileNames = const ['我'];
-      profileIds = const [0];
-    } else {
-      profileNames = rows.map((r) => r['name'] as String).toList(growable: false);
-      profileIds = rows.map((r) => r['id'] as int).toList(growable: false);
+    _reset();
+
+    try {
+      await _db.open(key);
+      final loadedQuestions = await _loader.questions();
+      final loadedPrizes = await _loader.prizes();
+      final rows = await _db.profiles();
+
+      final names = rows.isEmpty
+          ? const ['我']
+          : rows.map((r) => r['name'] as String).toList(growable: false);
+      final ids = rows.isEmpty
+          ? const [0]
+          : rows.map((r) => r['id'] as int).toList(growable: false);
+
+      questions = loadedQuestions;
+      prizes = loadedPrizes;
+      profileNames = names;
+      profileIds = ids;
+      activeProfile = 0;
+      this.key = key;
+    } catch (_) {
+      try {
+        await _db.close();
+      } catch (_) {
+        // Ignore; preserving the original failure below.
+      }
+      _reset();
+      rethrow;
     }
+  }
+
+  void _reset() {
+    key = null;
+    questions = const [];
+    prizes = const [];
+    profileNames = const ['我'];
+    profileIds = const [0];
     activeProfile = 0;
   }
 
