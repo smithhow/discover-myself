@@ -134,4 +134,32 @@ void main() {
     expect(find.byKey(const Key('stage_celebration')), findsNothing);
     await tester.pump(const Duration(milliseconds: 200));
   });
+
+  testWidgets('allows retrying after a failed submit', (tester) async {
+    var calls = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: AssessmentScreen(
+          questions: const [
+            Question(
+              id: 'p1',
+              type: 'personality',
+              dimension: 'openness',
+              text: 'Q1',
+              options: ['a', 'b'],
+            ),
+          ],
+          onDone: (_) => calls++,
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('a'));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(calls, 1);
+
+    await tester.tap(find.text('a'));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(calls, 2);
+  });
 }

@@ -60,6 +60,9 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
   void _answer(int value) {
     if (_locked || _celebrating != null || widget.questions.isEmpty) return;
     _locked = true;
+    Future.delayed(_lockFor, () {
+      if (mounted) _locked = false;
+    });
     final q = widget.questions[_i];
     _answers[q.id] = value;
     widget.audio?.tap();
@@ -81,9 +84,6 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
             Timer(const Duration(milliseconds: 800), _dismissCelebration);
       }
     }
-    Future.delayed(_lockFor, () {
-      if (mounted) _locked = false;
-    });
   }
 
   void _dismissCelebration() {
