@@ -1,4 +1,7 @@
 import '../db/database.dart';
+import '../models/assessment_record.dart';
+import '../models/career.dart';
+import '../models/dimension.dart';
 import '../models/question.dart';
 import 'assessment.dart';
 import 'asset_loader.dart';
@@ -33,6 +36,12 @@ class AppCoordinator {
   /// Assessment questions loaded on unlock.
   List<Question> questions = const [];
 
+  /// Dimension metadata loaded on unlock.
+  List<DimensionInfo> dimensions = const [];
+
+  /// Career suggestions loaded on unlock.
+  List<CareerItem> careers = const [];
+
   /// Lottery prizes loaded on unlock.
   List<Prize> prizes = const [];
 
@@ -47,6 +56,8 @@ class AppCoordinator {
     try {
       await _db.open(key);
       final loadedQuestions = await _loader.questions();
+      final loadedDimensions = await _loader.dimensions();
+      final loadedCareers = await _loader.careers();
       final loadedPrizes = await _loader.prizes();
       final rows = await _db.profiles();
 
@@ -58,6 +69,8 @@ class AppCoordinator {
           : rows.map((r) => r['id'] as int).toList(growable: false);
 
       questions = loadedQuestions;
+      dimensions = loadedDimensions;
+      careers = loadedCareers;
       prizes = loadedPrizes;
       profileNames = names;
       profileIds = ids;
@@ -77,6 +90,8 @@ class AppCoordinator {
   void _reset() {
     key = null;
     questions = const [];
+    dimensions = const [];
+    careers = const [];
     prizes = const [];
     profileNames = const ['我'];
     profileIds = const [0];
@@ -93,17 +108,31 @@ class AppCoordinator {
     if (activeProfile < 0) activeProfile = profileIds.length - 1;
   }
 
-  /// Scores [answers], persists the rounded per-dimension result and returns
-  /// the averaged scores keyed by dimension.
+  /// Scores [answers], persists the rounded per-dimension result and answer
+  /// sheet, and returns the averaged scores keyed by dimension.
   Future<Map<String, double>> submitAnswers(Map<String, int> answers) async {
     final scores = AssessmentService(questions).score(answers);
     final rounded = scores.map((k, v) => MapEntry(k, v.round()));
     final type = questions.isNotEmpty ? questions.first.type : 'personality';
-    final profileId =
-        profileIds.isNotEmpty ? profileIds[activeProfile] : activeProfile;
-    await _db.insertResult(profileId, type, rounded);
+    await _db.saveResult(
+      _activeProfileId,
+      type,
+      rounded,
+      answers: answers,
+    );
     return scores;
   }
+
+  int get _activeProfileId =>
+      profileIds.isNotEmpty ? profileIds[activeProfile] : activeProfile;
+
+  /// The newest persisted attempt for the active profile, if any.
+  Future<AssessmentRecord?> latestResult() =>
+      _db.latestResult(_activeProfileId);
+
+  /// All persisted attempts for the active profile, newest first.
+  Future<List<AssessmentRecord>> resultHistory() =>
+      _db.resultHistory(_activeProfileId);
 
   /// Growth tips relevant to [scores].
   Future<List<String>> recommendations(Map<String, double> scores) =>
@@ -113,6 +142,8 @@ class AppCoordinator {
   Future<void> lock() async {
     key = null;
     questions = const [];
+    dimensions = const [];
+    careers = const [];
     prizes = const [];
     await _db.close();
   }
