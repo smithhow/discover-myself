@@ -6,7 +6,11 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart'
 import 'package:discover_self/src/app.dart';
 import 'package:discover_self/src/db/database.dart';
 import 'package:discover_self/src/services/app_coordinator.dart';
+import 'package:discover_self/src/services/audio_service.dart';
 import 'package:discover_self/src/services/pin_service.dart';
+import 'package:discover_self/src/ui/assessment/assessment_screen.dart';
+
+AudioService _silentAudio() => AudioService(silent: true);
 
 AppCoordinator _coordinator() => AppCoordinator(
       database: Database(inMemory: true, factory: databaseFactoryFfi),
@@ -54,6 +58,27 @@ Future<void> _unlock(WidgetTester tester) async {
   await _act(tester, () => tester.tap(find.byKey(const Key('pin_submit'))));
 }
 
+/// Answers every question in the assessment, tapping the first option each
+/// time. The final tap triggers the (async) submit, so it runs via [_act].
+Future<void> _answerAll(WidgetTester tester) async {
+  final count = tester
+      .widget<AssessmentScreen>(find.byType(AssessmentScreen))
+      .questions
+      .length;
+  for (var i = 0; i < count - 1; i++) {
+    await tester.tap(find.byType(ListTile).first, warnIfMissed: false);
+    await tester.pump(const Duration(milliseconds: 250));
+
+    final celebration = find.byKey(const Key('stage_celebration'));
+    if (celebration.evaluate().isNotEmpty) {
+      await tester.tap(celebration);
+      await tester.pump(const Duration(milliseconds: 250));
+    }
+  }
+  await _act(tester,
+      () => tester.tap(find.byType(ListTile).first, warnIfMissed: false));
+}
+
 void main() {
   setUpAll(sqfliteFfiInit);
 
@@ -64,6 +89,7 @@ void main() {
       home: RootFlow(
         coordinator: _coordinator(),
         pinService: _pinService(),
+        audio: _silentAudio(),
         onExport: () async => exported = true,
       ),
     ));
@@ -83,13 +109,15 @@ void main() {
     await tester.tap(find.text('孩子A'));
     await tester.pumpAndSettle();
 
-    // Assessment stage; answer the single bundled question.
+    // Assessment stage; answer every bundled question.
     expect(find.textContaining('测评'), findsOneWidget);
-    await _act(tester, () => tester.tap(find.text('同意')));
+    await _answerAll(tester);
 
     // Result stage with a working export control.
     expect(find.byKey(const Key('export_pdf')), findsOneWidget);
     expect(find.byKey(const Key('lottery')), findsOneWidget);
+    await tester.ensureVisible(find.byKey(const Key('export_pdf')));
+    await tester.pumpAndSettle();
     await _act(tester, () => tester.tap(find.byKey(const Key('export_pdf'))));
     expect(exported, isTrue);
   });
@@ -101,6 +129,7 @@ void main() {
       home: RootFlow(
         coordinator: _coordinator(),
         pinService: _pinService(),
+        audio: _silentAudio(),
         onExport: () async {},
         now: () => clock,
       ),
@@ -126,6 +155,7 @@ void main() {
       home: RootFlow(
         coordinator: _FailingSubmitCoordinator(),
         pinService: _pinService(),
+        audio: _silentAudio(),
         onExport: () async {},
       ),
     ));
@@ -139,7 +169,7 @@ void main() {
     await tester.tap(find.text('孩子A'));
     await tester.pumpAndSettle();
 
-    await _act(tester, () => tester.tap(find.text('同意')));
+    await _answerAll(tester);
 
     expect(find.text('提交失败，请重试'), findsOneWidget);
     expect(find.byKey(const Key('export_pdf')), findsNothing);
