@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+
 import '../../models/question.dart';
 import '../../services/audio_service.dart';
 import 'stage_celebration.dart';
@@ -46,8 +47,9 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
   void initState() {
     super.initState();
     if (widget.questions.isEmpty) {
-      WidgetsBinding.instance
-          .addPostFrameCallback((_) => widget.onDone(const {}));
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => widget.onDone(const {}),
+      );
     }
   }
 
@@ -80,8 +82,10 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
       if (title != null && !MediaQuery.of(context).disableAnimations) {
         _celebrationTimer?.cancel();
         setState(() => _celebrating = title);
-        _celebrationTimer =
-            Timer(const Duration(milliseconds: 800), _dismissCelebration);
+        _celebrationTimer = Timer(
+          const Duration(milliseconds: 800),
+          _dismissCelebration,
+        );
       }
     }
   }
@@ -108,6 +112,7 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
     final total = widget.questions.length;
     final stage = _stageTitles[q.type] ?? '测评';
     final audio = widget.audio;
+    final reduceMotion = MediaQuery.of(context).disableAnimations;
     return Scaffold(
       appBar: AppBar(
         title: Text('测评 ${_i + 1}/$total'),
@@ -134,54 +139,61 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
       ),
       body: Stack(
         children: [
-          Column(children: [
-            LinearProgressIndicator(
-              value: (_i + 1) / total,
-              minHeight: 6,
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(stage,
+          Column(
+            children: [
+              LinearProgressIndicator(value: (_i + 1) / total, minHeight: 6),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    stage,
                     style: const TextStyle(
-                        color: Colors.deepPurple, fontSize: 13)),
-              ),
-            ),
-            Expanded(
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 220),
-                switchInCurve: Curves.easeOut,
-                switchOutCurve: Curves.easeIn,
-                transitionBuilder: (child, anim) => FadeTransition(
-                  opacity: anim,
-                  child: SlideTransition(
-                    position: Tween<Offset>(
-                      begin: const Offset(0.06, 0),
-                      end: Offset.zero,
-                    ).animate(anim),
-                    child: child,
+                      color: Colors.deepPurple,
+                      fontSize: 13,
+                    ),
                   ),
                 ),
-                child: Column(
-                  key: ValueKey(_i),
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(16),
-                      child:
-                          Text(q.text, style: const TextStyle(fontSize: 20)),
+              ),
+              Expanded(
+                child: AnimatedSwitcher(
+                  duration: reduceMotion
+                      ? Duration.zero
+                      : const Duration(milliseconds: 220),
+                  switchInCurve: Curves.easeOut,
+                  switchOutCurve: Curves.easeIn,
+                  transitionBuilder: (child, anim) => FadeTransition(
+                    opacity: anim,
+                    child: SlideTransition(
+                      position: Tween<Offset>(
+                        begin: const Offset(0.06, 0),
+                        end: Offset.zero,
+                      ).animate(anim),
+                      child: child,
                     ),
-                    for (var i = 0; i < q.options.length; i++)
-                      ListTile(
-                        title: Text(q.options[i]),
-                        onTap: () => _answer(i + 1),
+                  ),
+                  child: Column(
+                    key: ValueKey(_i),
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Text(
+                          q.text,
+                          style: const TextStyle(fontSize: 20),
+                        ),
                       ),
-                  ],
+                      for (var i = 0; i < q.options.length; i++)
+                        ListTile(
+                          title: Text(q.options[i]),
+                          onTap: () => _answer(i + 1),
+                        ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ]),
+            ],
+          ),
           if (_celebrating != null)
             Positioned.fill(
               child: StageCelebration(

@@ -70,16 +70,26 @@ class _ResultScreenState extends State<ResultScreen>
     'interest',
   ];
 
-  late final AnimationController _controller = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 900),
-  );
+  late final AnimationController _controller;
+  bool _started = false;
 
   bool get _isReview => widget.reviewedAt != null;
 
   @override
   void initState() {
     super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_started) return;
+    if (MediaQuery.of(context).disableAnimations) return;
+    _started = true;
     _controller.forward();
   }
 
@@ -120,8 +130,10 @@ class _ResultScreenState extends State<ResultScreen>
             ),
             const SizedBox(height: 12),
           ],
-          Text('档案：${widget.profileName}',
-              style: const TextStyle(fontSize: 18)),
+          Text(
+            '档案：${widget.profileName}',
+            style: const TextStyle(fontSize: 18),
+          ),
           const SizedBox(height: 12),
           _buildOverall(summary),
           const SizedBox(height: 8),
@@ -136,8 +148,10 @@ class _ResultScreenState extends State<ResultScreen>
             _buildChips('可能需要谨慎的方向', summary.cautiousCareers, Colors.orange),
           ],
           const SizedBox(height: 16),
-          const Text('成长建议',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          const Text(
+            '成长建议',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
           for (final r in widget.recommendations) Text('• $r'),
           if (widget.onRetake != null) ...[
             const SizedBox(height: 16),
@@ -158,8 +172,9 @@ class _ResultScreenState extends State<ResultScreen>
           const SizedBox(height: 16),
           ElevatedButton(
             key: const Key('export_pdf'),
-            onPressed:
-                widget.onExport == null ? null : () => widget.onExport!(),
+            onPressed: widget.onExport == null
+                ? null
+                : () => widget.onExport!(),
             child: const Text('导出 PDF 报告'),
           ),
           if (!_isReview && widget.onLottery != null) ...[
@@ -181,13 +196,16 @@ class _ResultScreenState extends State<ResultScreen>
           : FadeTransition(
               opacity: _controller,
               child: SlideTransition(
-                position: Tween<Offset>(
-                  begin: const Offset(0, 0.02),
-                  end: Offset.zero,
-                ).animate(CurvedAnimation(
-                  parent: _controller,
-                  curve: Curves.easeOut,
-                )),
+                position:
+                    Tween<Offset>(
+                      begin: const Offset(0, 0.02),
+                      end: Offset.zero,
+                    ).animate(
+                      CurvedAnimation(
+                        parent: _controller,
+                        curve: Curves.easeOut,
+                      ),
+                    ),
                 child: content,
               ),
             ),
@@ -195,21 +213,23 @@ class _ResultScreenState extends State<ResultScreen>
   }
 
   Widget _buildOverall(ProfileSummary summary) => Card(
-        elevation: 0,
-        color: const Color(0xFFF3EFFB),
-        child: Padding(
-          padding: const EdgeInsets.all(14),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('总体评价',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 6),
-              Text(summary.headline, style: const TextStyle(height: 1.5)),
-            ],
+    elevation: 0,
+    color: const Color(0xFFF3EFFB),
+    child: Padding(
+      padding: const EdgeInsets.all(14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            '总体评价',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
-        ),
-      );
+          const SizedBox(height: 6),
+          Text(summary.headline, style: const TextStyle(height: 1.5)),
+        ],
+      ),
+    ),
+  );
 
   List<String> _orderedTypes() {
     final present = <String>{
@@ -329,8 +349,10 @@ class _ResultScreenState extends State<ResultScreen>
       Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          Text(
+            title,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 6),
           Wrap(
             spacing: 8,

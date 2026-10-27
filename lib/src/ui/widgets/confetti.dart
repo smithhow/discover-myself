@@ -19,10 +19,23 @@ class Confetti extends StatefulWidget {
 
 class _ConfettiState extends State<Confetti>
     with SingleTickerProviderStateMixin {
-  late final AnimationController _controller = AnimationController(
-    vsync: this,
-    duration: widget.duration,
-  )..forward();
+  late final AnimationController _controller;
+  bool _started = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: widget.duration);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_started) return;
+    if (MediaQuery.of(context).disableAnimations) return;
+    _started = true;
+    _controller.forward();
+  }
 
   @override
   void dispose() {
