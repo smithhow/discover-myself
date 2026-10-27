@@ -1,3 +1,26 @@
-{ "version": 1, "items": [
-  { "dimension": "openness", "action": "每周阅读一本新领域书籍" }
-]}
+{
+  "version": 2,
+  "items": [
+    { "dimension": "openness", "action": "每月尝试一件从未做过的小事，拓展体验边界" },
+    { "dimension": "openness", "action": "阅读一本与你专业无关的书籍，训练发散思维" },
+    { "dimension": "conscientiousness", "action": "用待办清单管理每日任务，并为重要事项设定截止时间" },
+    { "dimension": "conscientiousness", "action": "把大目标拆成 25 分钟可完成的小步骤，逐个攻破" },
+    { "dimension": "extraversion", "action": "每周主动发起一次小型社交，练习表达与倾听" },
+    { "dimension": "agreeableness", "action": "在冲突中先复述对方观点，再表达自己的立场" },
+    { "dimension": "emotional_stability", "action": "每天花 5 分钟做呼吸或正念练习，稳定情绪基线" },
+    { "dimension": "logic", "action": "每天做一道逻辑谜题，训练推断与证伪能力" },
+    { "dimension": "numerical", "action": "练习心算与数列规律，提升数字敏感度" },
+    { "dimension": "verbal", "action": "积累类比与近反义词，提升语言推理的准确度" },
+    { "dimension": "self_awareness", "action": "用情绪日记记录触发点，提高自我觉察" },
+    { "dimension": "self_regulation", "action": "情绪上头时先暂停 6 秒再做回应，训练自控" },
+    { "dimension": "motivation", "action": "为一件感兴趣的事设定 30 天挑战，保持内在驱动" },
+    { "dimension": "empathy", "action": "对话中多问“你当时是什么感受”，练习换位思考" },
+    { "dimension": "social_skills", "action": "练习用“事实—感受—需求”结构表达，减少误解" },
+    { "dimension": "realistic", "action": "尝试一项动手项目（组装、木工或 DIY），积累实操经验" },
+    { "dimension": "investigative", "action": "就一个感兴趣的问题做一次小型调研并写成小结" },
+    { "dimension": "artistic", "action": "每周进行一次自由创作，不拘形式地表达想法" },
+    { "dimension": "social", "action": "参与一次志愿服务或助人活动，发挥你的支持力" },
+    { "dimension": "enterprising", "action": "主动承担一次小项目的牵头人，锻炼领导与推动力" },
+    { "dimension": "conventional", "action": "建立一套个人文件/资料归档规范，提升条理性" }
+  ]
+}

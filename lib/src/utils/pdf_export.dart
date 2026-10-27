@@ -8,6 +8,9 @@ Future<Uint8List> buildReportPdf({
   required String profileName,
   required Map<String, double> scores,
   required List<String> recommendations,
+  String? summary,
+  List<String> suitableCareers = const [],
+  List<String> cautiousCareers = const [],
 }) async {
   final cjk = pw.Font.ttf(await rootBundle.load('assets/fonts/SimHei.ttf'));
   final theme = pw.ThemeData.withFont(base: cjk, bold: cjk);
@@ -20,6 +23,11 @@ Future<Uint8List> buildReportPdf({
       build: (ctx) => [
         pw.Header(level: 0, text: '发现自我 - 测评报告'),
         pw.Text('档案：$profileName'),
+        if (summary != null && summary.isNotEmpty) ...[
+          pw.SizedBox(height: 12),
+          pw.Text('总体评价', style: const pw.TextStyle(fontSize: 16)),
+          pw.Text(summary),
+        ],
         pw.SizedBox(height: 12),
         pw.Text('维度得分', style: const pw.TextStyle(fontSize: 16)),
         pw.Bullet(
@@ -27,6 +35,16 @@ Future<Uint8List> buildReportPdf({
               .map((e) => '${e.key}: ${e.value.toStringAsFixed(2)}')
               .join('\n'),
         ),
+        if (suitableCareers.isNotEmpty) ...[
+          pw.SizedBox(height: 12),
+          pw.Text('适合的择业方向', style: const pw.TextStyle(fontSize: 16)),
+          pw.Text(suitableCareers.join('、')),
+        ],
+        if (cautiousCareers.isNotEmpty) ...[
+          pw.SizedBox(height: 12),
+          pw.Text('可能需要谨慎的方向', style: const pw.TextStyle(fontSize: 16)),
+          pw.Text(cautiousCareers.join('、')),
+        ],
         pw.SizedBox(height: 12),
         pw.Text('成长建议', style: const pw.TextStyle(fontSize: 16)),
         for (final r in recommendations) pw.Bullet(text: r),

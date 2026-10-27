@@ -12,5 +12,12 @@ void main() {
   test('questions.json 含 items 数组', () async {
     final data = await loadJson('questions.json');
     expect(data['items'], isA<List>());
+    expect((data['items'] as List).length, greaterThanOrEqualTo(100));
+  });
+
+  test('models.json 含 dimensions 数组', () async {
+    final data = await loadJson('models.json');
+    expect(data['dimensions'], isA<List>());
+    expect((data['dimensions'] as List).length, greaterThanOrEqualTo(15));
   });
 }

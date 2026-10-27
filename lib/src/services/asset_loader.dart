@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/services.dart' show rootBundle;
 
+import '../models/career.dart';
+import '../models/dimension.dart';
 import '../models/question.dart';
 import 'lottery.dart';
 
@@ -17,6 +19,22 @@ class AssetLoader {
     final data = await _read('questions.json');
     return (data['items'] as List)
         .map((e) => Question.fromJson(e as Map<String, dynamic>))
+        .toList(growable: false);
+  }
+
+  /// Dimension metadata from `assets/data/models.json`.
+  Future<List<DimensionInfo>> dimensions() async {
+    final data = await _read('models.json');
+    return (data['dimensions'] as List)
+        .map((e) => DimensionInfo.fromJson(e as Map<String, dynamic>))
+        .toList(growable: false);
+  }
+
+  /// Career suggestions from `assets/data/career.json`.
+  Future<List<CareerItem>> careers() async {
+    final data = await _read('career.json');
+    return (data['items'] as List)
+        .map((e) => CareerItem.fromJson(e as Map<String, dynamic>))
         .toList(growable: false);
   }
 

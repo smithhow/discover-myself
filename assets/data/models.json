@@ -1,3 +1,27 @@
-{ "version": 1, "dimensions": [
-  { "key": "openness", "label": "开放性", "weight": 1.0, "threshold": 3.0 }
-]}
+{
+  "version": 2,
+  "dimensions": [
+    { "key": "openness", "label": "开放性", "type": "personality", "kind": "likert", "max": 5, "weight": 1.0, "threshold": 3.5, "desc": "你有多愿意接受新想法、新体验与变化。" },
+    { "key": "conscientiousness", "label": "尽责性", "type": "personality", "kind": "likert", "max": 5, "weight": 1.0, "threshold": 3.5, "desc": "你做事的条理性、自律与坚持程度。" },
+    { "key": "extraversion", "label": "外向性", "type": "personality", "kind": "likert", "max": 5, "weight": 1.0, "threshold": 3.5, "desc": "你从社交中获得能量、主动表达的程度。" },
+    { "key": "agreeableness", "label": "宜人性", "type": "personality", "kind": "likert", "max": 5, "weight": 1.0, "threshold": 3.5, "desc": "你待人的友善、信任与合作倾向。" },
+    { "key": "emotional_stability", "label": "情绪稳定性", "type": "personality", "kind": "likert", "max": 5, "weight": 1.0, "threshold": 3.5, "desc": "你在压力下保持情绪平稳的能力。" },
+
+    { "key": "logic", "label": "逻辑推理", "type": "iq", "kind": "choice", "max": 1, "weight": 1.0, "threshold": 0.6, "desc": "依据条件进行推断、判断结论是否成立的能力。" },
+    { "key": "numerical", "label": "数字数列", "type": "iq", "kind": "choice", "max": 1, "weight": 1.0, "threshold": 0.6, "desc": "对数字规律与数量关系的敏感度。" },
+    { "key": "verbal", "label": "言语类比", "type": "iq", "kind": "choice", "max": 1, "weight": 1.0, "threshold": 0.6, "desc": "把握词语之间关系、迁移理解的能力。" },
+
+    { "key": "self_awareness", "label": "自我认知", "type": "eq", "kind": "likert", "max": 5, "weight": 1.0, "threshold": 3.5, "desc": "觉察并理解自己情绪与状态的能力。" },
+    { "key": "self_regulation", "label": "情绪调节", "type": "eq", "kind": "likert", "max": 5, "weight": 1.0, "threshold": 3.5, "desc": "管理冲动、平复情绪的能力。" },
+    { "key": "motivation", "label": "内在动机", "type": "eq", "kind": "likert", "max": 5, "weight": 1.0, "threshold": 3.5, "desc": "自我驱动、为长期目标坚持的热情。" },
+    { "key": "empathy", "label": "共情", "type": "eq", "kind": "likert", "max": 5, "weight": 1.0, "threshold": 3.5, "desc": "理解并感受他人情绪的能力。" },
+    { "key": "social_skills", "label": "社交技能", "type": "eq", "kind": "likert", "max": 5, "weight": 1.0, "threshold": 3.5, "desc": "沟通、协调与处理人际关系的能力。" },
+
+    { "key": "realistic", "label": "现实型 R", "type": "interest", "kind": "likert", "max": 5, "weight": 1.0, "threshold": 3.5, "desc": "偏好动手操作、工具与实物的活动。" },
+    { "key": "investigative", "label": "研究型 I", "type": "interest", "kind": "likert", "max": 5, "weight": 1.0, "threshold": 3.5, "desc": "偏好思考、探究与分析的活动。" },
+    { "key": "artistic", "label": "艺术型 A", "type": "interest", "kind": "likert", "max": 5, "weight": 1.0, "threshold": 3.5, "desc": "偏好创作、表达与审美的活动。" },
+    { "key": "social", "label": "社会型 S", "type": "interest", "kind": "likert", "max": 5, "weight": 1.0, "threshold": 3.5, "desc": "偏好帮助、教导与服务他人的活动。" },
+    { "key": "enterprising", "label": "企业型 E", "type": "interest", "kind": "likert", "max": 5, "weight": 1.0, "threshold": 3.5, "desc": "偏好领导、说服与推动目标的活动。" },
+    { "key": "conventional", "label": "常规型 C", "type": "interest", "kind": "likert", "max": 5, "weight": 1.0, "threshold": 3.5, "desc": "偏好规则、条理与细致的事务。" }
+  ]
+}

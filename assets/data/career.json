@@ -1,3 +1,24 @@
-{ "version": 1, "items": [
-  { "dimension": "openness", "min": 3.5, "careers": ["产品经理","设计师"] }
-]}
+{
+  "version": 2,
+  "items": [
+    { "dimension": "openness", "min": 3.5, "careers": ["产品经理", "设计师", "市场策划", "内容创作"] },
+    { "dimension": "conscientiousness", "min": 3.5, "careers": ["项目管理", "会计审计", "质量工程师", "运营主管"] },
+    { "dimension": "extraversion", "min": 3.5, "careers": ["销售", "公关", "培训师", "客户成功"] },
+    { "dimension": "agreeableness", "min": 3.5, "careers": ["人力资源", "客户服务", "教师", "咨询顾问"] },
+    { "dimension": "emotional_stability", "min": 3.5, "careers": ["急诊医护", "飞行签派", "危机公关", "风控"] },
+    { "dimension": "logic", "min": 0.6, "careers": ["软件工程师", "数据分析师", "律师", "研究员"] },
+    { "dimension": "numerical", "min": 0.6, "careers": ["精算师", "量化研究员", "财务分析", "数据科学"] },
+    { "dimension": "verbal", "min": 0.6, "careers": ["编辑", "翻译", "文案策划", "记者"] },
+    { "dimension": "self_awareness", "min": 3.5, "careers": ["职业规划师", "心理教练", "组织发展"] },
+    { "dimension": "self_regulation", "min": 3.5, "careers": ["项目经理", "客户经理", "外科医生"] },
+    { "dimension": "motivation", "min": 3.5, "careers": ["创业者", "研发工程师", "独立创作者"] },
+    { "dimension": "empathy", "min": 3.5, "careers": ["心理咨询师", "护理", "社工", "UX 研究"] },
+    { "dimension": "social_skills", "min": 3.5, "careers": ["商务拓展", "公关", "团队管理", "客户成功"] },
+    { "dimension": "realistic", "min": 3.5, "careers": ["机械工程师", "电气工程师", "运动教练", "农业技术"] },
+    { "dimension": "investigative", "min": 3.5, "careers": ["科研人员", "算法工程师", "医生", "数据科学"] },
+    { "dimension": "artistic", "min": 3.5, "careers": ["设计师", "导演", "作家", "音乐人"] },
+    { "dimension": "social", "min": 3.5, "careers": ["教师", "咨询顾问", "社工", "医护"] },
+    { "dimension": "enterprising", "min": 3.5, "careers": ["销售总监", "创业者", "市场负责人", "投行顾问"] },
+    { "dimension": "conventional", "min": 3.5, "careers": ["会计", "审计", "行政管理", "数据治理"] }
+  ]
+}
