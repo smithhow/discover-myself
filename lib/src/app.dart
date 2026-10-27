@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:printing/printing.dart';
 
 import 'encryption/key_derivation.dart';
+import 'models/assessment_record.dart';
 import 'services/app_coordinator.dart';
 import 'services/audio_service.dart';
 import 'services/device_id.dart';
@@ -10,7 +11,9 @@ import 'services/pin_service.dart';
 import 'services/summary.dart';
 import 'ui/assessment/assessment_screen.dart';
 import 'ui/onboarding/pin_screen.dart';
+import 'ui/onboarding/profile_action_sheet.dart';
 import 'ui/onboarding/profile_select_screen.dart';
+import 'ui/result/history_screen.dart';
 import 'ui/result/result_screen.dart';
 import 'ui/widgets/confetti.dart';
 import 'utils/pdf_export.dart';
@@ -141,6 +144,7 @@ class _RootFlowState extends State<RootFlow> with WidgetsBindingObserver {
   Map<String, double> _scores = const {};
   List<String> _recommendations = const [];
   DateTime? _pausedAt;
+  DateTime? _viewedAt;
 
   late final AudioService _audio = widget.audio ?? AudioService();
   bool get _ownsAudio => widget.audio == null;
@@ -182,6 +186,7 @@ class _RootFlowState extends State<RootFlow> with WidgetsBindingObserver {
       _stage = _Stage.profiles;
       _scores = const {};
       _recommendations = const [];
+      _viewedAt = null;
     });
   }
 
@@ -236,6 +241,101 @@ class _RootFlowState extends State<RootFlow> with WidgetsBindingObserver {
     );
   }
 
+  Future<void> _selectProfile(int index) async {
+    _c.activeProfile = index;
+
+    AssessmentRecord? latest;
+    var history = const <AssessmentRecord>[];
+    try {
+      latest = await _c.latestResult();
+      history = await _c.resultHistory();
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('读取历史失败')),
+      );
+      return;
+    }
+    if (!mounted) return;
+
+    final record = latest;
+    if (record == null) {
+      setState(() {
+        _viewedAt = null;
+        _stage = _Stage.assessment;
+      });
+      return;
+    }
+
+    final action = await showModalBottomSheet<ProfileAction>(
+      context: context,
+      showDragHandle: true,
+      builder: (_) => ProfileActionSheet(
+        profileName: _activeName,
+        lastFinishedAt: record.finishedAt,
+        historyCount: history.length,
+      ),
+    );
+    if (!mounted || action == null) return;
+
+    switch (action) {
+      case ProfileAction.viewLatest:
+        await _openRecord(record);
+      case ProfileAction.retake:
+        setState(() {
+          _viewedAt = null;
+          _stage = _Stage.assessment;
+        });
+      case ProfileAction.history:
+        await _openHistory();
+    }
+  }
+
+  Future<void> _openRecord(AssessmentRecord record) async {
+    try {
+      final recs = await _c.recommendations(record.scores);
+      if (!mounted) return;
+      setState(() {
+        _scores = record.scores;
+        _recommendations = recs;
+        _viewedAt = record.finishedAt;
+        _stage = _Stage.result;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('读取历史失败')),
+      );
+    }
+  }
+
+  Future<void> _openHistory() async {
+    var records = const <AssessmentRecord>[];
+    try {
+      records = await _c.resultHistory();
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('读取历史失败')),
+      );
+      return;
+    }
+    if (!mounted) return;
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (_) => HistoryScreen(
+          records: records,
+          dimensions: _c.dimensions,
+          careers: _c.careers,
+          onOpen: (record) {
+            Navigator.of(context).pop();
+            _openRecord(record);
+          },
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_c.key == null) {
@@ -254,10 +354,7 @@ class _RootFlowState extends State<RootFlow> with WidgetsBindingObserver {
       case _Stage.profiles:
         return ProfileSelectScreen(
           names: _c.profileNames,
-          onSelect: (i) => setState(() {
-            _c.activeProfile = i;
-            _stage = _Stage.assessment;
-          }),
+          onSelect: _selectProfile,
           onCreate: (name) async {
             await _c.createProfile(name, randomSalt());
             if (!mounted) return;
@@ -277,8 +374,14 @@ class _RootFlowState extends State<RootFlow> with WidgetsBindingObserver {
           recommendations: _recommendations,
           dimensions: _c.dimensions,
           careers: _c.careers,
+          reviewedAt: _viewedAt,
           onExport: widget.onExport ?? _defaultExport,
-          onLottery: _drawLottery,
+          onLottery: _viewedAt == null ? _drawLottery : null,
+          onRetake: () => setState(() {
+            _viewedAt = null;
+            _stage = _Stage.assessment;
+          }),
+          onHistory: _openHistory,
         );
     }
   }
@@ -296,6 +399,7 @@ class _RootFlowState extends State<RootFlow> with WidgetsBindingObserver {
       setState(() {
         _scores = scores;
         _recommendations = recs;
+        _viewedAt = null;
         _stage = _Stage.result;
       });
       await _audio.result();

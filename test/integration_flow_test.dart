@@ -106,8 +106,7 @@ void main() {
     await _act(
         tester, () => tester.tap(find.byKey(const Key('profile_create_confirm'))));
     expect(find.text('孩子A'), findsOneWidget);
-    await tester.tap(find.text('孩子A'));
-    await tester.pumpAndSettle();
+    await _act(tester, () => tester.tap(find.text('孩子A')));
 
     // Assessment stage; answer every bundled question.
     expect(find.textContaining('测评'), findsOneWidget);
@@ -166,8 +165,7 @@ void main() {
     await tester.enterText(find.byKey(const Key('profile_name_field')), '孩子A');
     await _act(tester,
         () => tester.tap(find.byKey(const Key('profile_create_confirm'))));
-    await tester.tap(find.text('孩子A'));
-    await tester.pumpAndSettle();
+    await _act(tester, () => tester.tap(find.text('孩子A')));
 
     await _answerAll(tester);
 
