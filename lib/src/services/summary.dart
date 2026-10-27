@@ -41,20 +41,24 @@ ProfileSummary buildSummary({
   ];
 
   final ranked = [...known]
-    ..sort((a, b) => scores[b.key]!.compareTo(scores[a.key]!));
+    ..sort(
+      (a, b) =>
+          b.normalized(scores[b.key]!).compareTo(a.normalized(scores[a.key]!)),
+    );
 
   final strengths = ranked.take(strengthCount).toList(growable: false);
-  final watchouts = ranked.length <= strengthCount
+  final remaining = ranked.skip(strengths.length).toList(growable: false);
+  final watchouts = remaining.isEmpty
       ? const <DimensionInfo>[]
-      : ranked.reversed.take(watchoutCount).toList(growable: false);
+      : remaining.reversed.take(watchoutCount).toList(growable: false);
 
   final choice = known.where((d) => d.isChoice).toList(growable: false);
   final accuracy = choice.isEmpty
       ? null
       : (choice.map((d) => scores[d.key]!).reduce((a, b) => a + b) /
-              choice.length *
-              100)
-          .round();
+                choice.length *
+                100)
+            .round();
 
   final headline = _headline(strengths, watchouts, accuracy);
 
@@ -69,7 +73,10 @@ ProfileSummary buildSummary({
 }
 
 String _headline(
-    List<DimensionInfo> strengths, List<DimensionInfo> watchouts, int? accuracy) {
+  List<DimensionInfo> strengths,
+  List<DimensionInfo> watchouts,
+  int? accuracy,
+) {
   final s = strengths.map((d) => d.label).join('、');
   final w = watchouts.map((d) => d.label).join('、');
   final buffer = StringBuffer();
@@ -89,7 +96,10 @@ String _headline(
 }
 
 List<String> _careersFor(
-    List<DimensionInfo> dims, List<CareerItem> careers, {required int limit}) {
+  List<DimensionInfo> dims,
+  List<CareerItem> careers, {
+  required int limit,
+}) {
   final keys = {for (final d in dims) d.key};
   final out = <String>[];
   for (final c in careers) {

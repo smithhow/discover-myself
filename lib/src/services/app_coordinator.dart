@@ -15,8 +15,8 @@ import 'lottery.dart';
 /// of truth that owns the [Database] handle.
 class AppCoordinator {
   AppCoordinator({Database? database, AssetLoader? loader})
-      : _db = database ?? Database(),
-        _loader = loader ?? AssetLoader();
+    : _db = database ?? Database(),
+      _loader = loader ?? AssetLoader();
 
   final Database _db;
   final AssetLoader _loader;
@@ -108,18 +108,12 @@ class AppCoordinator {
     if (activeProfile < 0) activeProfile = profileIds.length - 1;
   }
 
-  /// Scores [answers], persists the rounded per-dimension result and answer
-  /// sheet, and returns the averaged scores keyed by dimension.
+  /// Scores [answers], persists the raw per-dimension result and answer sheet,
+  /// and returns the averaged scores keyed by dimension.
   Future<Map<String, double>> submitAnswers(Map<String, int> answers) async {
     final scores = AssessmentService(questions).score(answers);
-    final rounded = scores.map((k, v) => MapEntry(k, v.round()));
     final type = questions.isNotEmpty ? questions.first.type : 'personality';
-    await _db.saveResult(
-      _activeProfileId,
-      type,
-      rounded,
-      answers: answers,
-    );
+    await _db.saveResult(_activeProfileId, type, scores, answers: answers);
     return scores;
   }
 

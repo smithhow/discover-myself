@@ -103,7 +103,7 @@ class Database {
   Future<int> insertResult(
     int profileId,
     String type,
-    Map<String, int> scores, {
+    Map<String, num> scores, {
     Map<String, int>? answers,
   }) async => _db!.insert('assessments', {
     'profile_id': profileId,
@@ -117,7 +117,7 @@ class Database {
   Future<void> saveResult(
     int profileId,
     String type,
-    Map<String, int> scores, {
+    Map<String, num> scores, {
     required Map<String, int> answers,
     int keep = 50,
   }) async {
