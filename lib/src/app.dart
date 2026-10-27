@@ -22,9 +22,9 @@ import 'utils/pdf_export.dart';
 ///
 /// [coordinator] can be injected by tests; production uses a default instance.
 Widget app({AppCoordinator? coordinator}) => MaterialApp(
-      title: '发现自我',
-      home: RootFlow(coordinator: coordinator ?? AppCoordinator()),
-    );
+  title: '发现自我',
+  home: RootFlow(coordinator: coordinator ?? AppCoordinator()),
+);
 
 enum _Stage { profiles, assessment, result }
 
@@ -49,55 +49,67 @@ class _PrizeDialogState extends State<_PrizeDialog> {
   }
 
   @override
-  Widget build(BuildContext context) => AlertDialog(
-        title: const Text('抽奖'),
-        content: SizedBox(
-          height: 160,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              if (_revealed) const Positioned.fill(child: Confetti()),
-              Center(
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 320),
-                  transitionBuilder: (child, anim) => ScaleTransition(
-                    scale:
-                        CurvedAnimation(parent: anim, curve: Curves.easeOutBack),
-                    child: FadeTransition(opacity: anim, child: child),
+  Widget build(BuildContext context) {
+    final reduceMotion = MediaQuery.of(context).disableAnimations;
+    return AlertDialog(
+      title: const Text('抽奖'),
+      content: SizedBox(
+        height: 160,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            if (_revealed) const Positioned.fill(child: Confetti()),
+            Center(
+              child: AnimatedSwitcher(
+                duration: reduceMotion
+                    ? Duration.zero
+                    : const Duration(milliseconds: 320),
+                transitionBuilder: (child, anim) => ScaleTransition(
+                  scale: CurvedAnimation(
+                    parent: anim,
+                    curve: Curves.easeOutBack,
                   ),
-                  child: _revealed
-                      ? Column(
-                          key: const ValueKey('prize'),
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.emoji_events,
-                                size: 44, color: Colors.amber),
-                            const SizedBox(height: 8),
-                            Text('恭喜获得：${widget.prize.name}',
-                                style: const TextStyle(fontSize: 18)),
-                          ],
-                        )
-                      : const Column(
-                          key: ValueKey('drawing'),
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            CircularProgressIndicator(),
-                            SizedBox(height: 12),
-                            Text('抽奖中…'),
-                          ],
-                        ),
+                  child: FadeTransition(opacity: anim, child: child),
                 ),
+                child: _revealed
+                    ? Column(
+                        key: const ValueKey('prize'),
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.emoji_events,
+                            size: 44,
+                            color: Colors.amber,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            '恭喜获得：${widget.prize.name}',
+                            style: const TextStyle(fontSize: 18),
+                          ),
+                        ],
+                      )
+                    : const Column(
+                        key: ValueKey('drawing'),
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          CircularProgressIndicator(),
+                          SizedBox(height: 12),
+                          Text('抽奖中…'),
+                        ],
+                      ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('确定'),
-          ),
-        ],
-      );
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('确定'),
+        ),
+      ],
+    );
+  }
 }
 
 /// Owns the top-level flow: PIN unlock → profile select → assessment → result.
@@ -145,6 +157,8 @@ class _RootFlowState extends State<RootFlow> with WidgetsBindingObserver {
   List<String> _recommendations = const [];
   DateTime? _pausedAt;
   DateTime? _viewedAt;
+  bool _submitting = false;
+  bool _selectingProfile = false;
 
   late final AudioService _audio = widget.audio ?? AudioService();
   bool get _ownsAudio => widget.audio == null;
@@ -182,6 +196,7 @@ class _RootFlowState extends State<RootFlow> with WidgetsBindingObserver {
     await _audio.setMusic(false);
     await _c.lock();
     if (!mounted) return;
+    Navigator.of(context).popUntil((route) => route.isFirst);
     setState(() {
       _stage = _Stage.profiles;
       _scores = const {};
@@ -212,12 +227,8 @@ class _RootFlowState extends State<RootFlow> with WidgetsBindingObserver {
 
   /// Maps dimension keys to their Chinese labels for the PDF report.
   Map<String, double> _labeledScores() {
-    final labels = {
-      for (final d in _c.dimensions) d.key: d.label,
-    };
-    return {
-      for (final e in _scores.entries) (labels[e.key] ?? e.key): e.value,
-    };
+    final labels = {for (final d in _c.dimensions) d.key: d.label};
+    return {for (final e in _scores.entries) (labels[e.key] ?? e.key): e.value};
   }
 
   Future<void> _drawLottery() async {
@@ -225,11 +236,14 @@ class _RootFlowState extends State<RootFlow> with WidgetsBindingObserver {
     final prize = Lottery(_c.prizes).draw(seed);
     await _audio.win();
     if (!mounted) return;
+    final reduceMotion = MediaQuery.of(context).disableAnimations;
     await showGeneralDialog<void>(
       context: context,
       barrierDismissible: true,
       barrierLabel: '抽奖',
-      transitionDuration: const Duration(milliseconds: 320),
+      transitionDuration: reduceMotion
+          ? Duration.zero
+          : const Duration(milliseconds: 320),
       pageBuilder: (_, __, ___) => _PrizeDialog(prize: prize),
       transitionBuilder: (ctx, anim, _, child) => FadeTransition(
         opacity: anim,
@@ -242,59 +256,69 @@ class _RootFlowState extends State<RootFlow> with WidgetsBindingObserver {
   }
 
   Future<void> _selectProfile(int index) async {
-    _c.activeProfile = index;
-
-    AssessmentRecord? latest;
-    var history = const <AssessmentRecord>[];
+    if (_selectingProfile) return;
+    _selectingProfile = true;
+    final previous = _c.activeProfile;
     try {
-      latest = await _c.latestResult();
-      history = await _c.resultHistory();
-    } catch (_) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('读取历史失败')),
-      );
-      return;
-    }
-    if (!mounted) return;
+      _c.activeProfile = index;
+      final name = index >= 0 && index < _c.profileNames.length
+          ? _c.profileNames[index]
+          : '我';
 
-    final record = latest;
-    if (record == null) {
-      setState(() {
-        _viewedAt = null;
-        _stage = _Stage.assessment;
-      });
-      return;
-    }
+      AssessmentRecord? latest;
+      var history = const <AssessmentRecord>[];
+      try {
+        latest = await _c.latestResult();
+        history = await _c.resultHistory();
+      } catch (_) {
+        _c.activeProfile = previous;
+        if (!mounted || _c.key == null) return;
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text('读取历史失败')));
+        return;
+      }
+      if (!mounted || _c.key == null) return;
 
-    final action = await showModalBottomSheet<ProfileAction>(
-      context: context,
-      showDragHandle: true,
-      builder: (_) => ProfileActionSheet(
-        profileName: _activeName,
-        lastFinishedAt: record.finishedAt,
-        historyCount: history.length,
-      ),
-    );
-    if (!mounted || action == null) return;
-
-    switch (action) {
-      case ProfileAction.viewLatest:
-        await _openRecord(record);
-      case ProfileAction.retake:
+      final record = latest;
+      if (record == null) {
         setState(() {
           _viewedAt = null;
           _stage = _Stage.assessment;
         });
-      case ProfileAction.history:
-        await _openHistory();
+        return;
+      }
+
+      final action = await showModalBottomSheet<ProfileAction>(
+        context: context,
+        showDragHandle: true,
+        builder: (_) => ProfileActionSheet(
+          profileName: name,
+          lastFinishedAt: record.finishedAt,
+          historyCount: history.length,
+        ),
+      );
+      if (!mounted || _c.key == null || action == null) return;
+
+      switch (action) {
+        case ProfileAction.viewLatest:
+          await _openRecord(record);
+        case ProfileAction.retake:
+          setState(() {
+            _viewedAt = null;
+            _stage = _Stage.assessment;
+          });
+        case ProfileAction.history:
+          await _openHistory();
+      }
+    } finally {
+      _selectingProfile = false;
     }
   }
 
   Future<void> _openRecord(AssessmentRecord record) async {
     try {
       final recs = await _c.recommendations(record.scores);
-      if (!mounted) return;
+      if (!mounted || _c.key == null) return;
       setState(() {
         _scores = record.scores;
         _recommendations = recs;
@@ -302,10 +326,9 @@ class _RootFlowState extends State<RootFlow> with WidgetsBindingObserver {
         _stage = _Stage.result;
       });
     } catch (_) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('读取历史失败')),
-      );
+      if (!mounted || _c.key == null) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('读取历史失败')));
     }
   }
 
@@ -314,13 +337,12 @@ class _RootFlowState extends State<RootFlow> with WidgetsBindingObserver {
     try {
       records = await _c.resultHistory();
     } catch (_) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('读取历史失败')),
-      );
+      if (!mounted || _c.key == null) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('读取历史失败')));
       return;
     }
-    if (!mounted) return;
+    if (!mounted || _c.key == null) return;
     await Navigator.of(context).push<void>(
       MaterialPageRoute<void>(
         builder: (_) => HistoryScreen(
@@ -392,22 +414,35 @@ class _RootFlowState extends State<RootFlow> with WidgetsBindingObserver {
   /// try/catch keeps a failure from becoming an unhandled async error and
   /// surfaces it to the user instead of leaving them stuck.
   Future<void> _finishAssessment(Map<String, int> answers) async {
+    if (_submitting) return;
+    _submitting = true;
+
+    final Map<String, double> scores;
     try {
-      final scores = await _c.submitAnswers(answers);
-      final recs = await _c.recommendations(scores);
-      if (!mounted) return;
-      setState(() {
-        _scores = scores;
-        _recommendations = recs;
-        _viewedAt = null;
-        _stage = _Stage.result;
-      });
-      await _audio.result();
+      scores = await _c.submitAnswers(answers);
     } catch (_) {
+      _submitting = false;
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('提交失败，请重试')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('提交失败，请重试')));
+      return;
     }
+
+    List<String> recs;
+    try {
+      recs = await _c.recommendations(scores);
+    } catch (_) {
+      recs = const [];
+    }
+
+    _submitting = false;
+    if (!mounted) return;
+    setState(() {
+      _scores = scores;
+      _recommendations = recs;
+      _viewedAt = null;
+      _stage = _Stage.result;
+    });
+    await _audio.result();
   }
 }
