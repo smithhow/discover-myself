@@ -2618,6 +2618,6 @@ Verify:
 - [ ] **Step 4: Final commit**
 
 ```bash
-git add -A
+git add lib test
 git commit -m "test: verify animation and history flow end to end"
 ```
