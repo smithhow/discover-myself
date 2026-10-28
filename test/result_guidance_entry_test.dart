@@ -21,6 +21,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('guidance_entry')), findsOneWidget);
+    expect(find.text('查看建议'), findsOneWidget);
     await tester.ensureVisible(find.byKey(const Key('guidance_entry')));
     await tester.tap(find.byKey(const Key('guidance_entry')));
     expect(opened, isTrue);

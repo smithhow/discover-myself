@@ -64,6 +64,8 @@ void main() {
     expect(find.text('混合型'), findsOneWidget);
     expect(find.byKey(const Key('leadership_bar')), findsOneWidget);
     expect(find.byKey(const Key('execution_bar')), findsOneWidget);
+    expect(find.textContaining('专业深度'), findsOneWidget);
+    expect(find.textContaining('领导潜力 70%'), findsOneWidget);
     expect(find.byKey(const Key('guidance_next_steps')), findsOneWidget);
     expect(find.textContaining('软件工程师'), findsWidgets);
   });

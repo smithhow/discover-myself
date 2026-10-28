@@ -175,7 +175,7 @@ class _MajorCard extends StatelessWidget {
           if (fit.caution != null) ...[
             const SizedBox(height: 6),
             Text(
-              fit.caution!,
+              '需谨慎：${fit.caution!}',
               style: const TextStyle(fontSize: 13, color: Colors.orange),
             ),
           ],
@@ -276,7 +276,11 @@ class _LeadershipCard extends StatelessWidget {
             barKey: const Key('execution_bar'),
           ),
           const SizedBox(height: 4),
-          Text('判断依据：${profile.reasons.join('、')}'),
+          Text(
+            '判断依据：领导潜力 ${_pct(profile.leadership)}、执行稳定性 ${_pct(profile.execution)}、专业深度 ${_pct(profile.professionalDepth)}。',
+          ),
+          const SizedBox(height: 4),
+          Text('突出维度：${profile.reasons.join('、')}'),
           const SizedBox(height: 10),
           const Text('发展建议', style: TextStyle(fontWeight: FontWeight.bold)),
           for (final tip in profile.tips)
@@ -304,8 +308,7 @@ class _Bar extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [Text(label), Text(_pct(value))],
+          children: [Expanded(child: Text(label)), Text(_pct(value))],
         ),
         const SizedBox(height: 4),
         LinearProgressIndicator(key: barKey, value: value, minHeight: 8),

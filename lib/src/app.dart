@@ -161,6 +161,7 @@ class _RootFlowState extends State<RootFlow> with WidgetsBindingObserver {
   DateTime? _viewedAt;
   bool _submitting = false;
   bool _selectingProfile = false;
+  bool _openingGuidance = false;
 
   late final AudioService _audio = widget.audio ?? AudioService();
   bool get _ownsAudio => widget.audio == null;
@@ -361,6 +362,8 @@ class _RootFlowState extends State<RootFlow> with WidgetsBindingObserver {
   }
 
   Future<void> _openGuidance() async {
+    if (_openingGuidance) return;
+    _openingGuidance = true;
     try {
       final content = await _c.loadGuidanceContent();
       final report = buildGuidance(
@@ -380,6 +383,8 @@ class _RootFlowState extends State<RootFlow> with WidgetsBindingObserver {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('建议数据加载失败')),
       );
+    } finally {
+      _openingGuidance = false;
     }
   }
 

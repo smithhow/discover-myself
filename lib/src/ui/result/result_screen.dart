@@ -152,7 +152,13 @@ class _ResultScreenState extends State<ResultScreen>
                 leading: const Icon(Icons.explore_outlined),
                 title: const Text('发展建议'),
                 subtitle: const Text('专业方向 · 职业方向 · 领导力定位'),
-                trailing: const Icon(Icons.chevron_right),
+                trailing: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text('查看建议'),
+                    Icon(Icons.chevron_right),
+                  ],
+                ),
                 onTap: widget.onGuidance,
               ),
             ),

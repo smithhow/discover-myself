@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart'
@@ -10,6 +12,26 @@ import 'package:discover_self/src/models/dimension.dart';
 import 'package:discover_self/src/models/guidance.dart';
 import 'package:discover_self/src/services/app_coordinator.dart';
 import 'package:discover_self/src/services/audio_service.dart';
+
+GuidanceContent _guidanceContent() => GuidanceContent(
+      clusters: [
+        MajorCluster(
+          name: '计算机与人工智能',
+          summary: '编程、算法与数据。',
+          majors: const ['软件工程', '人工智能'],
+          weights: const {'investigative': 0.5, 'logic': 0.5},
+          minimums: const {},
+        ),
+      ],
+      careers: [
+        CareerAdviceItem(
+          name: '软件工程师',
+          cluster: '计算机与人工智能',
+          weights: const {'investigative': 0.5, 'logic': 0.5},
+          entry: '从编程实习或初级开发岗位进入。',
+        ),
+      ],
+    );
 
 class _GuidanceCoordinator extends AppCoordinator {
   _GuidanceCoordinator()
@@ -76,25 +98,7 @@ class _GuidanceCoordinator extends AppCoordinator {
       const [];
 
   @override
-  Future<GuidanceContent> loadGuidanceContent() async => GuidanceContent(
-        clusters: [
-          MajorCluster(
-            name: '计算机与人工智能',
-            summary: '编程、算法与数据。',
-            majors: const ['软件工程', '人工智能'],
-            weights: const {'investigative': 0.5, 'logic': 0.5},
-            minimums: const {},
-          ),
-        ],
-        careers: [
-          CareerAdviceItem(
-            name: '软件工程师',
-            cluster: '计算机与人工智能',
-            weights: const {'investigative': 0.5, 'logic': 0.5},
-            entry: '从编程实习或初级开发岗位进入。',
-          ),
-        ],
-      );
+  Future<GuidanceContent> loadGuidanceContent() async => _guidanceContent();
 
   @override
   Future<void> lock() async {
@@ -106,6 +110,17 @@ class _FailingGuidanceCoordinator extends _GuidanceCoordinator {
   @override
   Future<GuidanceContent> loadGuidanceContent() async =>
       throw Exception('bad guidance json');
+}
+
+class _GatedGuidanceCoordinator extends _GuidanceCoordinator {
+  final gate = Completer<GuidanceContent>();
+  int loadCalls = 0;
+
+  @override
+  Future<GuidanceContent> loadGuidanceContent() {
+    loadCalls++;
+    return gate.future;
+  }
 }
 
 void main() {
@@ -165,5 +180,40 @@ void main() {
     expect(find.byKey(const Key('guidance_screen')), findsOneWidget);
     expect(find.byKey(const Key('major_card_0')), findsOneWidget);
     expect(find.byKey(const Key('career_item_0')), findsOneWidget);
+  });
+
+  testWidgets('ignores a second guidance tap while the first is loading',
+      (tester) async {
+    final coordinator = _GatedGuidanceCoordinator()
+      ..key = List<int>.filled(32, 1);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: RootFlow(
+          coordinator: coordinator,
+          audio: AudioService(silent: true),
+          onExport: () async {},
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('我'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('view_last_result')));
+    await tester.pumpAndSettle();
+
+    await tester.ensureVisible(find.byKey(const Key('guidance_entry')));
+    await tester.tap(find.byKey(const Key('guidance_entry')));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('guidance_entry')));
+    await tester.pump();
+
+    expect(coordinator.loadCalls, 1);
+
+    coordinator.gate.complete(_guidanceContent());
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('guidance_screen')), findsOneWidget);
   });
 }
