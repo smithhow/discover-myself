@@ -134,6 +134,13 @@
     { "id": "i33", "type": "interest", "dimension": "conventional", "kind": "likert", "reverse": false, "text": "我对数字和账目很敏感。", "options": ["非常不同意", "不同意", "一般", "同意", "非常同意"] },
     { "id": "i34", "type": "interest", "dimension": "conventional", "kind": "likert", "reverse": false, "text": "我喜欢稳定、有秩序的工作环境。", "options": ["非常不同意", "不同意", "一般", "同意", "非常同意"] },
     { "id": "i35", "type": "interest", "dimension": "conventional", "kind": "likert", "reverse": false, "text": "我能耐心处理细致重复的工作。", "options": ["非常不同意", "不同意", "一般", "同意", "非常同意"] },
-    { "id": "i36", "type": "interest", "dimension": "conventional", "kind": "likert", "reverse": true, "text": "我讨厌按部就班，更爱随意发挥。", "options": ["非常不同意", "不同意", "一般", "同意", "非常同意"] }
+    { "id": "i36", "type": "interest", "dimension": "conventional", "kind": "likert", "reverse": true, "text": "我讨厌按部就班，更爱随意发挥。", "options": ["非常不同意", "不同意", "一般", "同意", "非常同意"] },
+
+    { "id": "w1", "type": "workstyle", "dimension": "leadership_drive", "kind": "likert", "reverse": false, "text": "我愿意为团队的结果做最终决策，并承担相应责任。", "options": ["非常不同意", "不同意", "一般", "同意", "非常同意"] },
+    { "id": "w2", "type": "workstyle", "dimension": "leadership_drive", "kind": "likert", "reverse": false, "text": "遇到分歧时，我愿意站出来协调并推动大家达成一致。", "options": ["非常不同意", "不同意", "一般", "同意", "非常同意"] },
+    { "id": "w3", "type": "workstyle", "dimension": "execution_focus", "kind": "likert", "reverse": false, "text": "比起管理别人，我更愿意把一项明确的任务做到极致。", "options": ["非常不同意", "不同意", "一般", "同意", "非常同意"] },
+    { "id": "w4", "type": "workstyle", "dimension": "execution_focus", "kind": "likert", "reverse": false, "text": "我享受把计划一步步落地、按时交付的过程。", "options": ["非常不同意", "不同意", "一般", "同意", "非常同意"] },
+    { "id": "w5", "type": "workstyle", "dimension": "adaptability", "kind": "likert", "reverse": false, "text": "面对不确定的情况，我愿意快速尝试、边做边调整。", "options": ["非常不同意", "不同意", "一般", "同意", "非常同意"] },
+    { "id": "w6", "type": "workstyle", "dimension": "adaptability", "kind": "likert", "reverse": true, "text": "我更喜欢稳定、可预期的工作节奏。", "options": ["非常不同意", "不同意", "一般", "同意", "非常同意"] }
   ]
 }

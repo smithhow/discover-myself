@@ -22,6 +22,10 @@
     { "key": "artistic", "label": "艺术型 A", "type": "interest", "kind": "likert", "max": 5, "weight": 1.0, "threshold": 3.5, "desc": "偏好创作、表达与审美的活动。" },
     { "key": "social", "label": "社会型 S", "type": "interest", "kind": "likert", "max": 5, "weight": 1.0, "threshold": 3.5, "desc": "偏好帮助、教导与服务他人的活动。" },
     { "key": "enterprising", "label": "企业型 E", "type": "interest", "kind": "likert", "max": 5, "weight": 1.0, "threshold": 3.5, "desc": "偏好领导、说服与推动目标的活动。" },
-    { "key": "conventional", "label": "常规型 C", "type": "interest", "kind": "likert", "max": 5, "weight": 1.0, "threshold": 3.5, "desc": "偏好规则、条理与细致的事务。" }
+    { "key": "conventional", "label": "常规型 C", "type": "interest", "kind": "likert", "max": 5, "weight": 1.0, "threshold": 3.5, "desc": "偏好规则、条理与细致的事务。" },
+
+    { "key": "leadership_drive", "label": "领导意愿", "type": "workstyle", "kind": "likert", "max": 5, "weight": 1.0, "threshold": 3.5, "desc": "愿意承担决策责任、协调分歧并推动团队。" },
+    { "key": "execution_focus", "label": "执行偏好", "type": "workstyle", "kind": "likert", "max": 5, "weight": 1.0, "threshold": 3.5, "desc": "偏好把明确任务落地、按计划交付。" },
+    { "key": "adaptability", "label": "变化适应", "type": "workstyle", "kind": "likert", "max": 5, "weight": 1.0, "threshold": 3.5, "desc": "面对不确定与变化时的尝试和调整意愿。" }
   ]
 }

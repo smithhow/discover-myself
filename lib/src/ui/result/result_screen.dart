@@ -61,6 +61,7 @@ class _ResultScreenState extends State<ResultScreen>
     'iq': '认知能力',
     'eq': '情商',
     'interest': '职业兴趣',
+    'workstyle': '工作风格',
   };
 
   static const List<String> _typeOrder = [
@@ -68,6 +69,7 @@ class _ResultScreenState extends State<ResultScreen>
     'iq',
     'eq',
     'interest',
+    'workstyle',
   ];
 
   late final AnimationController _controller;

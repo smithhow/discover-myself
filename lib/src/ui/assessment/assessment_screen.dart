@@ -41,6 +41,7 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
     'iq': '第 2 关 · 认知能力',
     'eq': '第 3 关 · 情商',
     'interest': '第 4 关 · 职业兴趣',
+    'workstyle': '第 5 关 · 工作风格',
   };
 
   @override
