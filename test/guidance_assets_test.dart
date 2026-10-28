@@ -63,6 +63,12 @@ void main() {
       );
       expect((career['entry'] as String).trim(), isNotEmpty, reason: name);
     }
+
+    final byName = {
+      for (final c in careers) c['name'] as String: c['cluster'] as String,
+    };
+    expect(byName['心理咨询师'], '教育与心理');
+    expect(byName['UI/UX 设计师'], '传媒、设计与艺术');
   });
 
   test('AssetLoader parses the guidance content', () async {

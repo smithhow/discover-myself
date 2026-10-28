@@ -97,7 +97,12 @@ GuidanceReport buildGuidance({
   final professional = _index(_professionalWeights, norms);
   final type = _classify(leadership, execution, professional);
   final tips = _tips(type);
-  final reasons = _leadershipReasons(norms, dimensions);
+  final reasonWeights = professional >= leadership && professional >= execution
+      ? _professionalWeights
+      : execution >= leadership
+      ? _executionWeights
+      : _leadershipWeights;
+  final reasons = _leadershipReasons(norms, dimensions, reasonWeights);
 
   final majors = _top(majorRanked, (m) => m.fit, 5);
   final careers = _top(careerRanked, (c) => c.fit, 8);
@@ -204,9 +209,9 @@ String _caution(
 ) {
   final parts = <String>[
     for (final key in unmet)
-      '${_label(key, dimensions)} 建议 ≥${(minimums[key]! * 100).round()}%，你当前 ${(norms[key]! * 100).round()}%',
+      '${_label(key, dimensions)}（建议 ≥${(minimums[key]! * 100).round()}%，你当前为 ${(norms[key]! * 100).round()}%）',
   ];
-  return '该方向通常需要：${parts.join('；')}。';
+  return '该方向通常需要较强的${parts.join('、')}。';
 }
 
 String _label(String key, List<DimensionInfo> dimensions) {
@@ -242,23 +247,15 @@ LeadershipType _classify(double leadership, double execution, double professiona
 List<String> _leadershipReasons(
   Map<String, double> norms,
   List<DimensionInfo> dimensions,
+  Map<String, double> weights,
 ) {
-  final combined = <String, double>{};
-  for (final weights in [
-    _leadershipWeights,
-    _executionWeights,
-    _professionalWeights,
-  ]) {
-    for (final entry in weights.entries) {
-      final value = norms[entry.key];
-      if (value == null) continue;
-      final contribution = entry.value * value;
-      if (contribution > (combined[entry.key] ?? 0)) {
-        combined[entry.key] = contribution;
-      }
-    }
+  final contributions = <String, double>{};
+  for (final entry in weights.entries) {
+    final value = norms[entry.key];
+    if (value == null) continue;
+    contributions[entry.key] = entry.value * value;
   }
-  final entries = combined.entries.toList()
+  final entries = contributions.entries.toList()
     ..sort((a, b) => b.value.compareTo(a.value));
   return [
     for (final entry in entries.take(3))

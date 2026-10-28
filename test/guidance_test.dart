@@ -112,6 +112,33 @@ void main() {
     );
   });
 
+  test('specialist reasons cite the dominant professional dimensions', () {
+    final report = _report(_scores({
+      'leadership_drive': 0.3,
+      'enterprising': 0.3,
+      'social_skills': 0.3,
+      'investigative': 0.95,
+      'artistic': 0.9,
+      'openness': 0.9,
+      'motivation': 0.9,
+      'execution_focus': 0.8,
+      'conscientiousness': 0.8,
+    }));
+    expect(report.leadership.type, LeadershipType.specialist);
+    expect(report.leadership.professionalDepth, greaterThan(0.65));
+    expect(report.leadership.reasons.any((r) => r.contains('研究型')), isTrue);
+  });
+
+  test('leader reasons cite the dominant leadership dimensions', () {
+    final report = _report(_scores({
+      'leadership_drive': 0.8,
+      'enterprising': 0.8,
+      'social_skills': 0.8,
+    }));
+    expect(report.leadership.type, LeadershipType.leader);
+    expect(report.leadership.reasons.any((r) => r.contains('领导意愿')), isTrue);
+  });
+
   test('classifies executor when execution is high and professional depth is low',
       () {
     expect(
@@ -170,7 +197,11 @@ void main() {
       content: content,
     );
     expect(report.majors.single.fit, closeTo(0.6375, 1e-9));
-    expect(report.majors.single.caution, contains('逻辑推理'));
+    expect(
+      report.majors.single.caution,
+      contains('该方向通常需要较强的逻辑推理'),
+    );
+    expect(report.majors.single.caution, contains('你当前为 50%'));
   });
 
   test('renormalizes when a weight key has no score', () {
