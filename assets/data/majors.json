@@ -1,0 +1,103 @@
+{
+  "version": 1,
+  "clusters": [
+    {
+      "name": "计算机与人工智能",
+      "summary": "以编程、算法、系统与数据为核心，适合喜欢抽象思考和持续学习的人。",
+      "majors": ["计算机科学与技术", "软件工程", "人工智能", "数据科学与大数据技术", "网络空间安全"],
+      "weights": {"investigative": 0.35, "logic": 0.25, "openness": 0.15, "conscientiousness": 0.15, "numerical": 0.10},
+      "minimums": {"logic": 0.5}
+    },
+    {
+      "name": "电子信息与自动化",
+      "summary": "连接硬件、信号与控制系统，适合既爱动手又愿意钻研原理的人。",
+      "majors": ["电子信息工程", "自动化", "通信工程", "微电子科学与工程", "机器人工程"],
+      "weights": {"investigative": 0.30, "realistic": 0.25, "logic": 0.20, "numerical": 0.15, "conscientiousness": 0.10},
+      "minimums": {"logic": 0.5}
+    },
+    {
+      "name": "机械与自动化",
+      "summary": "围绕机械结构、制造工艺与自动化系统，适合喜欢实物和工程落地的人。",
+      "majors": ["机械设计制造及其自动化", "车辆工程", "智能制造工程", "材料成型及控制工程", "工业设计"],
+      "weights": {"realistic": 0.35, "investigative": 0.20, "conscientiousness": 0.20, "openness": 0.15, "numerical": 0.10},
+      "minimums": {"realistic": 0.5}
+    },
+    {
+      "name": "土木、建筑与城市规划",
+      "summary": "关注空间、结构与城市环境，适合兼顾工程严谨与审美/规划的人。",
+      "majors": ["土木工程", "建筑学", "城乡规划", "工程管理", "风景园林"],
+      "weights": {"realistic": 0.30, "conscientiousness": 0.20, "openness": 0.20, "investigative": 0.20, "social_skills": 0.10},
+      "minimums": {"realistic": 0.45}
+    },
+    {
+      "name": "数学与基础理学",
+      "summary": "以抽象推理和实验探究为核心，适合愿意长期打基础、继续深造的人。",
+      "majors": ["数学与应用数学", "物理学", "化学", "生物科学", "统计学"],
+      "weights": {"investigative": 0.40, "logic": 0.25, "numerical": 0.20, "openness": 0.15},
+      "minimums": {"logic": 0.55}
+    },
+    {
+      "name": "医学与健康",
+      "summary": "需要长期学习、稳定情绪与对人负责，适合耐心细致、愿意服务他人的人。",
+      "majors": ["临床医学", "口腔医学", "护理学", "药学", "预防医学"],
+      "weights": {"investigative": 0.25, "conscientiousness": 0.25, "empathy": 0.20, "emotional_stability": 0.15, "social": 0.15},
+      "minimums": {"conscientiousness": 0.55}
+    },
+    {
+      "name": "经济与金融",
+      "summary": "与数字、市场与资源配置打交道，适合逻辑清晰、对数据敏感的人。",
+      "majors": ["经济学", "金融学", "会计学", "财务管理", "精算学"],
+      "weights": {"numerical": 0.30, "conscientiousness": 0.25, "conventional": 0.20, "logic": 0.15, "enterprising": 0.10},
+      "minimums": {"numerical": 0.5}
+    },
+    {
+      "name": "管理、市场与人力",
+      "summary": "围绕人、组织与市场展开，适合喜欢沟通协调、推动事情发生的人。",
+      "majors": ["工商管理", "市场营销", "人力资源管理", "行政管理", "电子商务"],
+      "weights": {"enterprising": 0.30, "social_skills": 0.25, "extraversion": 0.20, "conscientiousness": 0.15, "empathy": 0.10},
+      "minimums": {"social_skills": 0.45}
+    },
+    {
+      "name": "法学与公共管理",
+      "summary": "需要阅读、论证与规则意识，适合表达清晰、愿意处理复杂规则的人。",
+      "majors": ["法学", "知识产权", "政治学与行政学", "公共事业管理", "社会学"],
+      "weights": {"verbal": 0.25, "logic": 0.25, "conscientiousness": 0.20, "social_skills": 0.15, "self_regulation": 0.15},
+      "minimums": {"verbal": 0.5}
+    },
+    {
+      "name": "教育与心理",
+      "summary": "以理解人、帮助人成长为核心，适合有耐心、善于倾听的人。",
+      "majors": ["教育学", "心理学", "学前教育", "特殊教育", "教育技术学"],
+      "weights": {"social": 0.25, "empathy": 0.25, "social_skills": 0.20, "self_awareness": 0.15, "conscientiousness": 0.15},
+      "minimums": {"empathy": 0.5}
+    },
+    {
+      "name": "传媒、设计与艺术",
+      "summary": "重视表达、创意与审美，适合想法多、愿意持续产出作品的人。",
+      "majors": ["视觉传达设计", "数字媒体艺术", "新闻学", "广告学", "广播电视编导"],
+      "weights": {"artistic": 0.35, "openness": 0.25, "verbal": 0.20, "social_skills": 0.10, "extraversion": 0.10},
+      "minimums": {"artistic": 0.5}
+    },
+    {
+      "name": "语言、文学与人文",
+      "summary": "以语言、文本与思想为核心，适合喜欢阅读写作、追问意义的人。",
+      "majors": ["汉语言文学", "英语", "翻译", "历史学", "哲学"],
+      "weights": {"verbal": 0.30, "openness": 0.25, "artistic": 0.20, "investigative": 0.15, "empathy": 0.10},
+      "minimums": {"verbal": 0.5}
+    },
+    {
+      "name": "环境、农业与食品",
+      "summary": "关注自然、生产与可持续，适合愿意下现场、做长期改善的人。",
+      "majors": ["环境科学", "农业工程", "食品科学与工程", "生态学", "园林"],
+      "weights": {"realistic": 0.25, "investigative": 0.25, "conscientiousness": 0.20, "openness": 0.15, "social": 0.15},
+      "minimums": {"conscientiousness": 0.45}
+    },
+    {
+      "name": "体育与康复",
+      "summary": "结合身体训练、健康与教学，适合喜欢运动、愿意带人和做康复的人。",
+      "majors": ["体育教育", "运动训练", "康复治疗学", "运动人体科学", "社会体育指导与管理"],
+      "weights": {"realistic": 0.30, "social": 0.20, "empathy": 0.15, "conscientiousness": 0.15, "emotional_stability": 0.20},
+      "minimums": {"realistic": 0.45}
+    }
+  ]
+}

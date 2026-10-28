@@ -4,6 +4,7 @@ import 'package:flutter/services.dart' show rootBundle;
 
 import '../models/career.dart';
 import '../models/dimension.dart';
+import '../models/guidance.dart';
 import '../models/question.dart';
 import 'lottery.dart';
 
@@ -44,6 +45,14 @@ class AssetLoader {
     return (data['items'] as List)
         .map((e) => Prize.fromJson(e as Map<String, dynamic>))
         .toList(growable: false);
+  }
+
+  /// Major and career guidance content from `majors.json` and
+  /// `careers_advice.json`.
+  Future<GuidanceContent> guidanceContent() async {
+    final majors = await _read('majors.json');
+    final careers = await _read('careers_advice.json');
+    return GuidanceContent.parse(majors, careers);
   }
 
   /// Growth tips whose `dimension` is present in [scores].
