@@ -127,6 +127,10 @@ void main() {
     expect(report.leadership.type, LeadershipType.specialist);
     expect(report.leadership.professionalDepth, greaterThan(0.65));
     expect(report.leadership.reasons.any((r) => r.contains('研究型')), isTrue);
+    expect(
+      report.leadership.reasons.any((r) => r.contains('执行偏好')),
+      isFalse,
+    );
   });
 
   test('leader reasons cite the dominant leadership dimensions', () {
@@ -134,9 +138,13 @@ void main() {
       'leadership_drive': 0.8,
       'enterprising': 0.8,
       'social_skills': 0.8,
+      'investigative': 0.8,
+      'artistic': 0.7,
+      'openness': 0.7,
     }));
     expect(report.leadership.type, LeadershipType.leader);
     expect(report.leadership.reasons.any((r) => r.contains('领导意愿')), isTrue);
+    expect(report.leadership.reasons.any((r) => r.contains('研究型')), isFalse);
   });
 
   test('classifies executor when execution is high and professional depth is low',
@@ -202,6 +210,54 @@ void main() {
       contains('该方向通常需要较强的逻辑推理'),
     );
     expect(report.majors.single.caution, contains('你当前为 50%'));
+  });
+
+  test('formats a single unmet minimum with the spec punctuation', () {
+    final content = GuidanceContent(
+      clusters: [
+        MajorCluster(
+          name: '测试方向',
+          summary: '',
+          majors: const ['测试专业'],
+          weights: const {'logic': 1.0},
+          minimums: const {'logic': 0.5},
+        ),
+      ],
+      careers: const [],
+    );
+    final report = buildGuidance(
+      scores: _scores({'logic': 0.499}),
+      dimensions: _dims,
+      content: content,
+    );
+    final caution = report.majors.single.caution!;
+    expect(caution, contains('该方向通常需要较强的逻辑推理'));
+    expect(caution, contains('你当前为 50%'));
+    expect(caution, contains('（建议 ≥50%），你当前为 50%'));
+  });
+
+  test('formats multiple unmet minima with one current-value list', () {
+    final content = GuidanceContent(
+      clusters: [
+        MajorCluster(
+          name: '测试方向',
+          summary: '',
+          majors: const ['测试专业'],
+          weights: const {'logic': 0.5, 'empathy': 0.5},
+          minimums: const {'logic': 0.5, 'empathy': 0.6},
+        ),
+      ],
+      careers: const [],
+    );
+    final report = buildGuidance(
+      scores: _scores({'logic': 0.499, 'empathy': 0.395}),
+      dimensions: _dims,
+      content: content,
+    );
+    expect(
+      report.majors.single.caution,
+      '该方向通常需要较强的逻辑推理（建议 ≥50%）、共情（建议 ≥60%），你当前分别为 50%、40%。',
+    );
   });
 
   test('renormalizes when a weight key has no score', () {

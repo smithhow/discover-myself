@@ -3,7 +3,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:discover_self/src/models/guidance.dart';
 import 'package:discover_self/src/ui/result/guidance_screen.dart';
 
-GuidanceReport _report({bool hasWorkstyle = true, bool empty = false}) =>
+GuidanceReport _report({
+  bool hasWorkstyle = true,
+  bool empty = false,
+  String? caution,
+}) =>
     GuidanceReport(
       majors: empty
           ? const []
@@ -14,7 +18,7 @@ GuidanceReport _report({bool hasWorkstyle = true, bool empty = false}) =>
                 majors: const ['软件工程', '人工智能'],
                 fit: 0.82,
                 reasons: const ['你的研究型 I（90%）与该方向匹配'],
-                caution: null,
+                caution: caution,
               ),
             ],
       careers: empty
@@ -84,6 +88,21 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('guidance_reference_note')), findsOneWidget);
     expect(find.byKey(const Key('leadership_type')), findsOneWidget);
+  });
+
+  testWidgets('prefixes caution text with 需谨慎：', (tester) async {
+    const caution = '该方向通常需要较强的逻辑推理（建议 ≥50%），你当前为 40%。';
+    await tester.pumpWidget(
+      MaterialApp(
+        home: GuidanceScreen(
+          report: _report(caution: caution),
+          profileName: '我',
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.textContaining('需谨慎：'), findsOneWidget);
+    expect(find.textContaining(caution), findsOneWidget);
   });
 
   testWidgets('shows empty guidance but still renders leadership', (

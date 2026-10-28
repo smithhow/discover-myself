@@ -207,11 +207,17 @@ String _caution(
   Map<String, double> norms,
   List<DimensionInfo> dimensions,
 ) {
-  final parts = <String>[
+  final requirements = <String>[
     for (final key in unmet)
-      '${_label(key, dimensions)}（建议 ≥${(minimums[key]! * 100).round()}%，你当前为 ${(norms[key]! * 100).round()}%）',
+      '${_label(key, dimensions)}（建议 ≥${(minimums[key]! * 100).round()}%）',
   ];
-  return '该方向通常需要较强的${parts.join('、')}。';
+  final currents = <String>[
+    for (final key in unmet) '${(norms[key]! * 100).round()}%',
+  ];
+  final currentText = unmet.length == 1
+      ? '你当前为 ${currents.single}'
+      : '你当前分别为 ${currents.join('、')}';
+  return '该方向通常需要较强的${requirements.join('、')}，$currentText。';
 }
 
 String _label(String key, List<DimensionInfo> dimensions) {
