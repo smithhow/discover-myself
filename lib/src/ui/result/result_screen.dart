@@ -22,6 +22,7 @@ class ResultScreen extends StatefulWidget {
     this.onLottery,
     this.onRetake,
     this.onHistory,
+    this.onGuidance,
     this.reviewedAt,
   });
 
@@ -46,6 +47,9 @@ class ResultScreen extends StatefulWidget {
 
   /// Opens the history list. Hidden when `null`.
   final VoidCallback? onHistory;
+
+  /// Opens the development guidance page. Hidden when `null`.
+  final VoidCallback? onGuidance;
 
   /// When non-null the screen is showing a past attempt.
   final DateTime? reviewedAt;
@@ -139,6 +143,21 @@ class _ResultScreenState extends State<ResultScreen>
           const SizedBox(height: 12),
           _buildOverall(summary),
           const SizedBox(height: 8),
+          if (widget.onGuidance != null) ...[
+            Card(
+              elevation: 0,
+              color: const Color(0xFFE8F1FB),
+              child: ListTile(
+                key: const Key('guidance_entry'),
+                leading: const Icon(Icons.explore_outlined),
+                title: const Text('发展建议'),
+                subtitle: const Text('专业方向 · 职业方向 · 领导力定位'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: widget.onGuidance,
+              ),
+            ),
+            const SizedBox(height: 8),
+          ],
           for (final type in _orderedTypes())
             _buildGroup(type, () => barIndex++),
           if (summary.suitableCareers.isNotEmpty) ...[
