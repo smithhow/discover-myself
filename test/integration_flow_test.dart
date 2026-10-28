@@ -115,6 +115,7 @@ void main() {
     // Result stage with a working export control.
     expect(find.byKey(const Key('export_pdf')), findsOneWidget);
     expect(find.byKey(const Key('lottery')), findsOneWidget);
+    expect(find.byKey(const Key('guidance_entry')), findsOneWidget);
     await tester.ensureVisible(find.byKey(const Key('export_pdf')));
     await tester.pumpAndSettle();
     await _act(tester, () => tester.tap(find.byKey(const Key('export_pdf'))));

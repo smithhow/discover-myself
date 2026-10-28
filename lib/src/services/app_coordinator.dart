@@ -2,6 +2,7 @@ import '../db/database.dart';
 import '../models/assessment_record.dart';
 import '../models/career.dart';
 import '../models/dimension.dart';
+import '../models/guidance.dart';
 import '../models/question.dart';
 import 'assessment.dart';
 import 'asset_loader.dart';
@@ -131,6 +132,10 @@ class AppCoordinator {
   /// Growth tips relevant to [scores].
   Future<List<String>> recommendations(Map<String, double> scores) =>
       _loader.recommendations(scores);
+
+  /// Loads the guidance content libraries on demand.
+  Future<GuidanceContent> loadGuidanceContent() =>
+      _loader.guidanceContent();
 
   /// Clears the in-memory key/data and closes the database.
   Future<void> lock() async {

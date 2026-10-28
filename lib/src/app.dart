@@ -6,6 +6,7 @@ import 'models/assessment_record.dart';
 import 'services/app_coordinator.dart';
 import 'services/audio_service.dart';
 import 'services/device_id.dart';
+import 'services/guidance.dart';
 import 'services/lottery.dart';
 import 'services/pin_service.dart';
 import 'services/summary.dart';
@@ -13,6 +14,7 @@ import 'ui/assessment/assessment_screen.dart';
 import 'ui/onboarding/pin_screen.dart';
 import 'ui/onboarding/profile_action_sheet.dart';
 import 'ui/onboarding/profile_select_screen.dart';
+import 'ui/result/guidance_screen.dart';
 import 'ui/result/history_screen.dart';
 import 'ui/result/result_screen.dart';
 import 'ui/widgets/confetti.dart';
@@ -358,6 +360,29 @@ class _RootFlowState extends State<RootFlow> with WidgetsBindingObserver {
     );
   }
 
+  Future<void> _openGuidance() async {
+    try {
+      final content = await _c.loadGuidanceContent();
+      final report = buildGuidance(
+        scores: _scores,
+        dimensions: _c.dimensions,
+        content: content,
+      );
+      if (!mounted || _c.key == null) return;
+      await Navigator.of(context).push<void>(
+        MaterialPageRoute<void>(
+          builder: (_) =>
+              GuidanceScreen(report: report, profileName: _activeName),
+        ),
+      );
+    } catch (_) {
+      if (!mounted || _c.key == null) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('建议数据加载失败')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_c.key == null) {
@@ -404,6 +429,7 @@ class _RootFlowState extends State<RootFlow> with WidgetsBindingObserver {
             _stage = _Stage.assessment;
           }),
           onHistory: _openHistory,
+          onGuidance: _openGuidance,
         );
     }
   }

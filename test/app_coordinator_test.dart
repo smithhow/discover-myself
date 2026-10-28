@@ -5,6 +5,7 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart'
 import 'package:discover_self/src/db/database.dart';
 import 'package:discover_self/src/models/career.dart';
 import 'package:discover_self/src/models/dimension.dart';
+import 'package:discover_self/src/models/guidance.dart';
 import 'package:discover_self/src/models/question.dart';
 import 'package:discover_self/src/services/app_coordinator.dart';
 import 'package:discover_self/src/services/asset_loader.dart';
@@ -55,6 +56,12 @@ const _choiceTwo = Question(
 class _ChoiceLoader extends _StubLoader {
   @override
   Future<List<Question>> questions() async => const [_choiceOne, _choiceTwo];
+}
+
+class _GuidanceLoader extends _StubLoader {
+  @override
+  Future<GuidanceContent> guidanceContent() async =>
+      GuidanceContent(clusters: const [], careers: const []);
 }
 
 class _FailingOpenDatabase extends Database {
@@ -173,4 +180,16 @@ void main() {
       expect(latest!.scores['logic'], 0.5);
     },
   );
+
+  test('loadGuidanceContent delegates to the loader', () async {
+    final coordinator = AppCoordinator(
+      database: Database(inMemory: true, factory: databaseFactoryFfi),
+      loader: _GuidanceLoader(),
+    );
+    await coordinator.unlock(List<int>.filled(32, 1));
+
+    final content = await coordinator.loadGuidanceContent();
+    expect(content.clusters, isEmpty);
+    expect(content.careers, isEmpty);
+  });
 }
